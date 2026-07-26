@@ -1,0 +1,16 @@
+{
+  "name": "nepal-himalayan-timepieces",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NEPAL — Himalayan Timepieces: a self-contained, client-side premium watch e-commerce demo store.",
+  "scripts": {
+    "vendor": "node scripts/vendor-react.js",
+    "prestart": "node scripts/vendor-react.js",
+    "start": "node serve.js",
+    "serve": "node serve.js"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "license": "UNLICENSED"
+}

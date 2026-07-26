@@ -1095,7 +1095,13 @@
       // (Claude wrote it into the HTML) so it passes through unchanged.
       let stored = this.id ? getSlot(this.id) : this._local;
       if (stored && stored.u && !/^data:image\//i.test(stored.u)) stored = null;
-      const srcAttr = this.getAttribute('src') || '';
+      // Ignore an un-interpolated template placeholder (e.g. "{{ product.img }}").
+      // The raw <x-dc> template is briefly live in the DOM before the runtime
+      // swaps in the rendered tree, so slots can upgrade with a literal "{{ … }}"
+      // src — never a real URL. Guarding here avoids the wasted 404 fetch and the
+      // console noise it produces.
+      const rawSrc = this.getAttribute('src') || '';
+      const srcAttr = rawSrc.indexOf('{{') >= 0 ? '' : rawSrc;
       this._userUrl = (stored && stored.u) || null;
       const url = this._userUrl || srcAttr;
       // Don't clobber an in-flight reframe with a store-triggered re-render.
