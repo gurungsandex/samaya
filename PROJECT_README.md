@@ -6,6 +6,32 @@ A premium, Nepal-inspired watch e-commerce experience. This is a **front-end dem
 
 ---
 
+## Running locally
+
+The store is a single self-contained Design Component whose runtime fetches its
+sibling assets over HTTP, so it must be **served**, not opened via `file://`.
+
+```bash
+npm start          # serves on http://localhost:4173
+# or: PORT=3000 npm start
+```
+
+`npm start` runs `serve.js`, a zero-dependency static server (no install step).
+Then open the printed URL.
+
+**Offline / restricted networks:** `npm start` first runs `scripts/vendor-react.js`
+(the `prestart` hook), which downloads the React + ReactDOM 18.3.1 UMD builds from
+the npm registry into a git-ignored `vendor/` and writes `vendor/local-react.js`.
+That file points the runtime (`support.js`) at the local copies via
+`window.__resources`, so the store runs without reaching the public CDN. The
+downloaded bytes are verified against the Subresource-Integrity hashes pinned in
+`support.js`, so a corrupted or substituted download is rejected. When `vendor/` has
+not been built — e.g. serving the raw files from a static host — the loader `<script>`
+404s harmlessly and the runtime falls back to the CDN. Google Fonts load from the
+network when available and degrade to system serif/sans fallbacks when they don't.
+
+---
+
 ## What's included
 
 **Views (client-side router, no page reloads)**
