@@ -95,13 +95,67 @@ Inputs: bg `#17130e`, 1px `#2b2720` border, focus border `#A07C46`, invalid bord
 Fixed bottom‑center, bg `#F4F1EA`, dark text, ✓ prefix, auto‑dismiss ~2.6s.
 
 ## Watch Rendering Engine (distinctive — port or replace)
-The prototype builds each watch as an SVG string in `watchArt(product, shot, strapKey)` with helpers. **Recreate as a `<WatchArt product shot strap />` React component** returning inline SVG, or replace with real product photos. Key logic:
-- **Palette** (`wpal`): derives case metal tones (steel/titanium/bronze/gold/graphite), dial light/dark stops per dial color (White, Cream, Teal, Navy, Green, Black, Red, Ochre), a per‑model accent color, marker style, and a **dial style**.
-- **Dial styles** (per model): `scene` (layered mountain landscape with atmospheric haze, snow caps, sun glow — clipped to the dial), `chrono` (3 sub‑dials + tachymeter bezel), `octagon` (octagonal screw‑bezel sports watch + guilloché), `guilloche` (engine‑turned concentric dial + sub‑seconds). Scene kinds: everest, amadablam, fishtail, pyramid, range, dome, valley, skyline (temples), walls (Mustang).
-- **Markers**: index / arabic / dots / fiveDots / temple / stick / baton (applied, beveled with lume tint).
-- **Shots**: `front` (with strap), `dial` (zoomed, no strap), `caseback` (brushed disc with engraving text, region, WR, edition number).
-- **Straps** (`strapSVG`): `Leather` (tooled with dashed stitching + steel buckle), `Canvas` (woven texture), `Metal` (polished link bracelet with `lnk` gradient). Strap color varies by model.
-- Renders are cached by `slug-shot-strap` key. All output is `data:image/svg+xml,` encoded.
+
+One renderer, driven by a per-model spec. Every watch is a different watch — case
+size, metal, finish, bezel treatment, dial material, index type, hand style and
+complication all move independently. Nothing is one watch recoloured.
+
+**`watchSpec(slug)`** returns the model's spec:
+
+| Field | Meaning |
+|---|---|
+| `caseMm`, `l2lMm` | Case diameter 38–42 mm; lug-to-lug always under 49 mm |
+| `metal`, `finish` | `steel · titanium · bronze · gold · graphite · ceramic` × `brushed · polished · ceramic` |
+| `indexMetal` | Optional — markers in a different metal to the case (a blackened case still gets rhodium markers) |
+| `bezelStyle`, `bezelPct` | `slope · coin · flute · dive`; bezel is 8–11% of case diameter |
+| `dial` | `{type: sunburst · lacquer · grained · matte, base, axis, lift}` |
+| `index`, `hands` | Index type and lume; hand style `dauphine · sword · syringe · baton` |
+| `complication` | `null` or `gmt` |
+| `signature` | `{peak, element}` — the peak whose summit profile the model carries, and the **one** element carrying it: `12`, `counterweight`, or `caseback` |
+| `altitude` | Printed on the dial and engraved on the case back |
+
+**Geometry (`watchGeom`)** derives every radius as a ratio of case diameter, so the
+proportions hold at any size: dial opening 78–82%, hour hand to the inner index
+edge, minute hand to the minute track, seconds hand overshooting onto the chapter
+ring, crown ~12% of case diameter.
+
+**Materials** are three layers each — base colour, directional finish, specular
+highlight. Brushed steel is a fine repeating linear pattern under a top-left light
+wash; polished steel is a hard-stop gradient (never a smooth ramp); a sunburst dial
+is 360 narrow alternating wedges grouped into three paths, brighter along one axis;
+lacquer is a deep radial going near-black at the rim; sapphire is one diagonal
+glare band plus a faint blue-violet AR cast; ceramic is flatter than steel with its
+only highlight on the chamfer.
+
+**Details that separate real from fake:** applied indices are built as a side wall
+plus a face split down its own ridge (bright half, dark half), never a flat
+rectangle with a drop shadow; hands are faceted the same way; lume is a recessed
+warm-cream inlay inset from the index edge; the minute track carries 1/5/15-minute
+weights; the chapter ring is angled; the crown is fluted and signed; the date frame
+is chamfered in the case metal; the seconds hand has a counterweight.
+
+**Shots:** `front`, `dial` (zoomed, no strap), `caseback` (engraved altitude,
+region, and the summit relief on models signed there), `lume` (lights out, only the
+charged compound emitting).
+
+**Two renderers share all of the above:**
+- `watchArt(product, shot, strapKey, opts)` → `data:image/svg+xml,…` still, cached
+  by `slug|shot|strap|detail`. Used by every `<image-slot>` on the site.
+- `watchLive(product, opts)` → a React element with **inline** SVG. Used only on the
+  product hero. Hands run on CSS animations seeded with a negative delay equal to
+  the current time, so they show the real time and keep moving with no JS ticking
+  and no re-render per second. Pointer tilt is capped at 6° with the sapphire glare
+  tracking it, the case back flips, and `prefers-reduced-motion` drops the whole
+  lot back to a correct still.
+
+**Detail budget** — `detail: 1` (grid cards) / `2` (gallery thumbs) / `3` (hero).
+Lower levels drop the sunburst ray count, the 1-minute track marks, the bezel
+milling, the specular slivers and the crystal, none of which resolve at card size.
+Data URIs use a minimal five-character escaper rather than `encodeURIComponent`,
+which would inflate markup that is mostly angle brackets by about a third.
+
+**To replace with photography:** swap the `src` on the `<image-slot>` elements
+(ids below) and replace `P.watchEl` on the product hero with a slot of its own.
 
 ## Interactions & Behavior
 - **Nav scroll state**: header becomes opaque + bordered when `scrollY > 80` or view ≠ home.

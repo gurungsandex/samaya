@@ -15,6 +15,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 
 const ROOT = __dirname;
 const PORT = parseInt(process.env.PORT || '4173', 10);
@@ -58,7 +59,24 @@ const server = http.createServer((req, res) => {
       res.writeHead(404, { 'Content-Type': 'text/plain' }).end('Not Found');
       return;
     }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(filePath).toLowerCase()] || 'application/octet-stream' });
+    const ext = path.extname(filePath).toLowerCase();
+    const type = MIME[ext] || 'application/octet-stream';
+    const headers = { 'Content-Type': type };
+
+    // The store ships its watch renderings as inline SVG, which is text and
+    // compresses by roughly 8:1. Serving it raw makes the dev server look far
+    // heavier than any real host, so gzip it when the client asks — text types
+    // only; images and fonts are already compressed.
+    const compressible = /^(text\/|application\/(javascript|json)|image\/svg)/.test(type);
+    const acceptsGzip = /\bgzip\b/.test(req.headers['accept-encoding'] || '');
+    if (compressible && acceptsGzip) {
+      headers['Content-Encoding'] = 'gzip';
+      headers['Vary'] = 'Accept-Encoding';
+      res.writeHead(200, headers);
+      fs.createReadStream(filePath).pipe(zlib.createGzip()).pipe(res);
+      return;
+    }
+    res.writeHead(200, headers);
     fs.createReadStream(filePath).pipe(res);
   });
 });
