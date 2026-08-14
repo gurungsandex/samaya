@@ -34,6 +34,110 @@
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes popIn { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: none; } }
   @keyframes toastIn { from { opacity: 0; transform: translate(-50%,20px); } to { opacity: 1; } }
+
+  /* ===== SPECIFICATION FACE =================================================
+     Precision is the brand, so measured values are set in a monospace stack and
+     never in the body face. System stack only — no third webfont, no extra
+     request, no load-time cost. */
+  .spec { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+          font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+
+  /* ===== ONE SPACING RHYTHM ================================================= */
+  :root { --sp: 8px; --gap-s: calc(var(--sp) * 2); --gap-m: calc(var(--sp) * 4); --gap-l: calc(var(--sp) * 8); }
+
+  /* ===== WATCH ==============================================================
+     The SVG carries the watch; these rules carry the behaviour. Hands run on
+     CSS animations seeded with a negative delay equal to the current time, so
+     they start at the right position and keep going without JS ticking or a
+     re-render every second. */
+  .wa-stage { position: relative; width: 100%; height: 100%; perspective: 1100px; }
+  .wa-tilt  { position: relative; width: 100%; height: 100%; transform-style: preserve-3d;
+              transform: rotateX(var(--wa-tx, 0deg)) rotateY(var(--wa-ty, 0deg));
+              transition: transform .45s cubic-bezier(.16,1,.3,1); }
+  .wa-face  { position: absolute; inset: 0; backface-visibility: hidden; }
+  .wa-face svg { width: 100%; height: 100%; display: block; }
+  .wa-back  { transform: rotateY(180deg); }
+  .wa-stage.is-flipped .wa-tilt { transform: rotateY(180deg) rotateX(calc(var(--wa-tx, 0deg) * -1)); }
+
+  /* Hands. --wa-a is written into each group as the current angle; the inline
+     transform holds that angle for still renders and for reduced motion, and
+     the animation carries it forward from there when motion is allowed. */
+  @keyframes wa-rot { from { transform: rotate(var(--wa-a, 0deg)); } to { transform: rotate(calc(var(--wa-a, 0deg) + 360deg)); } }
+  .wa-face .wa-hand { transform-box: view-box; transform-origin: 240px 300px; }
+  .wa-face .wa-h { animation: wa-rot 43200s linear infinite; animation-delay: var(--wa-dh, 0s); }
+  .wa-face .wa-m { animation: wa-rot  3600s linear infinite; animation-delay: var(--wa-dm, 0s); }
+  .wa-face .wa-s { animation: wa-rot    60s linear infinite; animation-delay: var(--wa-ds, 0s); }
+  .wa-face .wa-g { animation: wa-rot 86400s linear infinite; animation-delay: var(--wa-dh, 0s); }
+
+  /* The sapphire glare follows the tilt, so the highlight moves with the case
+     rather than sitting painted onto it. */
+  .wa-glare { transform-box: view-box; transform-origin: 240px 300px;
+              transform: translate(var(--wa-gx, 0px), var(--wa-gy, 0px));
+              transition: transform .45s cubic-bezier(.16,1,.3,1); }
+
+  .wa-flip { position: absolute; right: 12px; bottom: 12px; z-index: 4; background: rgba(15,14,11,.82);
+             border: 1px solid #3a352c; color: #C9A26a; font-family: 'Jost', sans-serif; font-size: 10px;
+             letter-spacing: 0.18em; text-transform: uppercase; padding: 9px 14px; cursor: pointer; }
+  .wa-flip:hover { border-color: #A07C46; color: #E9E3D6; }
+  .wa-flip:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible,
+  select:focus-visible, textarea:focus-visible { outline: 2px solid #C9A26a; outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wa-face .wa-hand, .wa-face .wa-g { animation: none !important; }
+    .wa-tilt, .wa-glare { transition: none !important; }
+    .rise { transition: none !important; opacity: 1 !important; transform: none !important; }
+    [style*="floaty"] { animation: none !important; }
+  }
+
+  @media (max-width: 900px) {
+    .wa-stage { perspective: none; }
+    .wa-tilt { transform: none !important; }
+  }
+
+  /* ===== RESPONSIVE ==========================================================
+     The layout is written with inline styles, so the breakpoints reach the fixed
+     multi-column grids by the column template they declare. Nothing is
+     restructured — each grid simply collapses to one column on a narrow screen,
+     and the horizontal padding steps down with it. */
+  @media (max-width: 900px) {
+    [style*="grid-template-columns: 1.4fr 1fr"],
+    [style*="grid-template-columns: 1.1fr 1fr"],
+    [style*="grid-template-columns: 1fr 1fr"],
+    [style*="grid-template-columns: 260px 1fr"],
+    [style*="grid-template-columns: 300px 1fr"],
+    [style*="grid-template-columns: 1fr 380px"],
+    [style*="grid-template-columns:1fr 380px"],
+    [style*="grid-template-columns: 2fr 1fr 1fr 1fr"],
+    [style*="grid-template-columns: 1.2fr 1.6fr 1fr auto"] { grid-template-columns: 1fr !important; }
+    [style*="position: sticky"] { position: static !important; }
+    [style*="padding: 110px 48px"], [style*="padding: 116px 48px"],
+    [style*="padding: 130px 48px"], [style*="padding: 140px 48px"],
+    [style*="padding: 92px 48px"]   { padding-left: 20px !important; padding-right: 20px !important; }
+    [style*="padding: 110px 48px 60px"] { padding-left: 20px !important; padding-right: 20px !important; }
+    [style*="padding: 28px 40px 40px"], [style*="padding: 20px 40px 40px"],
+    [style*="padding: 24px 40px 0"]  { padding-left: 20px !important; padding-right: 20px !important; }
+    [style*="padding: 0 48px 88px"]  { padding-left: 20px !important; padding-right: 20px !important; }
+    [style*="padding: 18px 48px"]    { padding-left: 20px !important; padding-right: 20px !important; }
+    /* The header stacks into brand / actions / nav. Once it is three rows tall
+       the fixed-position compensation no longer holds, so the bar scrolls with
+       the page rather than guessing at its own height. */
+    [style*="position: fixed; top: 0; left: 0; right: 0; z-index: 100"] { position: relative !important; }
+    [style*="padding-top: 116px"] { padding-top: 20px !important; }
+    header { padding: 12px 16px !important; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    header > nav { order: 3; flex: 0 0 100% !important; justify-content: center; flex-wrap: wrap;
+                   gap: 16px !important; font-size: 10.5px !important; }
+    header > a { order: 1; flex: 0 0 100%; }
+    header > div { order: 2; flex: 0 0 100% !important; justify-content: center !important; gap: 18px !important; }
+    /* the peak map is decorative at this width; the record beside it is not */
+    #peaks [style*="aspect-ratio: 1000/460"] { min-height: 190px; }
+  }
+  @media (max-width: 560px) {
+    [style*="grid-template-columns: repeat(3,1fr)"],
+    [style*="grid-template-columns:2fr 1fr 1fr"],
+    [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+    [style*="grid-template-columns: repeat(5, 1fr)"] { grid-template-columns: repeat(4, 1fr) !important; }
+    h1, h2 { text-wrap: balance; }
+  }
 </style>
 </helmet>
 
@@ -185,8 +289,8 @@
         </div>
       </div>
       <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; color: #D3CCBD;">
-        <div style="font-family: 'Cormorant Garamond', serif; font-size: 40px; color: #F4F1EA; line-height: 1;">8,848.86<span style="font-size: 15px; font-family: 'Jost'; color: #B98D57;"> m</span></div>
-        <div style="font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;">Sagarmatha · Everest</div>
+        <div class="spec" style="font-size: 34px; color: #F4F1EA; line-height: 1; letter-spacing: -0.01em;">8,848.86<span style="font-size: 14px; color: #B98D57;"> m</span></div>
+        <div style="font-size: 10.5px; letter-spacing: 0.28em; text-transform: uppercase;">Sagarmāthā · Everest</div>
       </div>
     </div>
   </section>
@@ -201,7 +305,7 @@
         <div style="font-size: 12px; letter-spacing: 0.4em; text-transform: uppercase; color: #A07C46; margin-bottom: 14px;">The Collection</div>
         <h2 style="font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(34px, 5vw, 60px); color: #F4F1EA; line-height: 1;">Every Watch Tells<br>the Story of Nepal</h2>
       </div>
-      <a href="#" onClick="{{ nav.shop }}" style="font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #E9E3D6; border-bottom: 1px solid #A07C46; padding-bottom: 6px;" style-hover="color:#B98D57;">Shop all ten models →</a>
+      <a href="#" onClick="{{ nav.shop }}" style="font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #E9E3D6; border-bottom: 1px solid #A07C46; padding-bottom: 6px;" style-hover="color:#B98D57;">Shop the full collection →</a>
     </div>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 2px;">
       <sc-for list="{{ featured }}" as="w" hint-placeholder-count="4">
@@ -229,7 +333,7 @@
     <div class="rise" style="text-align: center; margin-bottom: 60px;">
       <div style="font-size: 12px; letter-spacing: 0.4em; text-transform: uppercase; color: #A07C46; margin-bottom: 14px;">Interactive</div>
       <h2 style="font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(34px, 5vw, 60px); color: #F4F1EA; line-height: 1;">Every Peak Has a Story</h2>
-      <p style="max-width: 520px; margin: 18px auto 0; font-size: 15px; line-height: 1.7; color: #A89F8f; font-weight: 300;">Trace the Himalayan skyline. Select a summit to meet the watch it inspired.</p>
+      <p style="max-width: 520px; margin: 18px auto 0; font-size: 15px; line-height: 1.7; color: #A89F8f; font-weight: 300;">Nepal's eight peaks above 8,000 metres — how each was named, who first stood on it, and the watch drawn from it. Select a summit.</p>
     </div>
     <div style="max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; align-items: center;">
       <div style="position: relative;">
@@ -246,11 +350,20 @@
       <div style="background: #17130E; border: 1px solid #2b2720; padding: 40px 36px; min-height: 380px; display: flex; flex-direction: column;">
         <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 14px;">
           <div style="font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase; color: #A07C46;">{{ activePeak.region }}</div>
-          <div style="font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #B98D57;">{{ activePeak.elevation }}<span style="font-size: 13px; font-family: 'Jost'; color: #6b6558;"> m</span></div>
+          <div class="spec" style="font-size: 21px; color: #B98D57; letter-spacing: 0;">{{ activePeak.elevation }}<span style="font-size: 12px; color: #6b6558;"> m</span></div>
         </div>
         <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 44px; color: #F4F1EA; line-height: 1; margin: 12px 0 6px;">{{ activePeak.name }}</h3>
         <div style="font-size: 12px; letter-spacing: 0.14em; color: #8b8378; text-transform: uppercase;">{{ activePeak.nick }}</div>
-        <p style="font-size: 14px; line-height: 1.75; color: #A89F8f; font-weight: 300; margin: 22px 0; flex: 1;">{{ activePeak.significance }}</p>
+        <dl style="margin: 20px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 7px 16px; font-size: 12.5px; line-height: 1.55;">
+          <dt style="color: #6b6558; letter-spacing: 0.14em; text-transform: uppercase; font-size: 10px; padding-top: 2px;">Name</dt>
+          <dd style="margin: 0; color: #C4BBAB; font-weight: 300;">{{ activePeak.nameMeaning }}</dd>
+          <dt style="color: #6b6558; letter-spacing: 0.14em; text-transform: uppercase; font-size: 10px; padding-top: 2px;">First ascent</dt>
+          <dd class="spec" style="margin: 0; color: #C4BBAB;">{{ activePeak.firstAscent }}<br><span style="color:#8b8378;">{{ activePeak.expedition }}</span></dd>
+          <dt style="color: #6b6558; letter-spacing: 0.14em; text-transform: uppercase; font-size: 10px; padding-top: 2px;">Lies in</dt>
+          <dd class="spec" style="margin: 0; color: #C4BBAB;">{{ activePeak.sovereignty }}</dd>
+        </dl>
+        <p style="font-size: 13.5px; line-height: 1.8; color: #A89F8f; font-weight: 300; margin: 18px 0 0;">{{ activePeak.detail }}</p>
+        <p style="font-size: 13.5px; line-height: 1.8; color: #A89F8f; font-weight: 300; margin: 14px 0 0; flex: 1;">{{ activePeak.significance }}</p>
         <div style="display: flex; align-items: center; gap: 18px; padding-top: 22px; border-top: 1px solid #2b2720;">
           <div style="width: 66px; height: 84px; flex-shrink: 0; overflow: hidden; border: 1px solid #2b2720;"><image-slot id="peakwatch-shared" shape="rect" fit="cover" src="{{ activePeak.img }}" placeholder="watch"></image-slot></div>
           <div style="flex: 1;">
@@ -269,10 +382,19 @@
     <div class="rise" style="position: relative; z-index: 2; max-width: 620px;">
       <div style="font-size: 12px; letter-spacing: 0.4em; text-transform: uppercase; color: #B98D57; margin-bottom: 20px;">Heritage</div>
       <h2 style="font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(36px, 5.4vw, 66px); color: #F4F1EA; line-height: 1;">The Gurkha Legacy</h2>
-      <p style="font-size: 16px; line-height: 1.8; color: #CFC8B8; font-weight: 300; margin: 26px 0;">For two centuries the Gurkha soldier has carried a reputation forged in courage, discipline, and unbreakable loyalty. Our Gurkha Legacy watch honours that spirit — not as military merchandise, but as a quiet field companion built to endure.</p>
+      <p style="font-size: 16px; line-height: 1.8; color: #CFC8B8; font-weight: 300; margin: 26px 0;">The first Gurkha regiments were raised in 1815 by the British East India Company — recruited out of the army it had just spent two years fighting in the Anglo-Nepalese War. In 1947 the Tripartite Agreement between Britain, India and Nepal divided those regiments: four went to the British Army, six stayed with India. Nepali soldiers have served under three flags ever since, and the arrangement is still argued over in Kathmandu, Delhi and London.</p>
+      <p style="font-size: 16px; line-height: 1.8; color: #CFC8B8; font-weight: 300; margin: 0 0 26px;">Our Gurkha Legacy watch is a field watch, not a piece of military merchandise. No insignia, no regimental colours, nothing borrowed from a uniform anyone earned.</p>
       <div style="display: flex; gap: 40px; margin: 32px 0; flex-wrap: wrap;">
-        <div><div style="font-family: 'Cormorant Garamond', serif; font-size: 34px; color: #B98D57;">1815</div><div style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #9a9284;">First regiments</div></div>
-        <div><div style="font-family: 'Cormorant Garamond', serif; font-size: 34px; color: #B98D57;">कायर हुनु</div><div style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #9a9284;">Better to die than live a coward</div></div>
+        <div><div class="spec" style="font-size: 28px; color: #B98D57;">1815</div><div style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #9a9284;">First regiments raised</div></div>
+        <div><div class="spec" style="font-size: 28px; color: #B98D57;">1947</div><div style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #9a9284;">Tripartite Agreement</div></div>
+        <!-- The site previously carried "कायर हुनु" here glossed as the Gurkha motto.
+             That is not the motto — it reads "to be a coward" and is missing the rest
+             of the line. The romanisation below is well attested; the Devanagari is
+             not consistently spelled across sources (kāphar / kāthar), so it is left
+             out rather than guessed at.
+             TODO-VERIFY: confirm the Devanagari spelling with a Nepali-language
+             source or a serving/retired Gurkha before restoring the script. -->
+        <div style="max-width: 300px;"><div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 21px; color: #B98D57; line-height: 1.3;">Kaphar hunnu bhanda marnu ramro</div><div style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #9a9284; margin-top: 6px;">Better to die than live a coward</div></div>
       </div>
       <button onClick="{{ activeGurkha }}" style="display: inline-block; padding: 16px 34px; background: #3A4636; color: #F4F1EA; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; border:none; cursor:pointer; font-family:'Jost';" style-hover="background:#48573f;">Meet the Gurkha Legacy</button>
     </div>
@@ -289,7 +411,7 @@
           <sc-for list="{{ craftSpecs }}" as="s" hint-placeholder-count="8">
             <div style="background: #F4F1EA; padding: 20px 18px;">
               <div style="font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #A07C46; margin-bottom: 7px;">{{ s.label }}</div>
-              <div style="font-family: 'Cormorant Garamond', serif; font-size: 20px; color: #1B1712; line-height: 1.15;">{{ s.value }}</div>
+              <div class="spec" style="font-size: 15px; color: #1B1712; line-height: 1.3;">{{ s.value }}</div>
             </div>
           </sc-for>
         </div>
@@ -361,7 +483,7 @@
         <div style="padding: 30px 28px 34px;">
           <div style="font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase; color: #A07C46; margin-bottom: 12px;">Courage &amp; Loyalty</div>
           <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #F4F1EA; line-height: 1.05; margin-bottom: 14px;">Better to Die Than Live a Coward</h3>
-          <p style="font-size: 14px; line-height: 1.8; color: #A89F8f; font-weight: 300;">For over two centuries the Gurkha has stood for a loyalty that asks nothing in return and a courage that never needs to raise its voice. We honour that spirit with restraint, not spectacle — a quiet field watch, built to be as dependable as the people who inspired it.</p>
+          <p style="font-size: 14px; line-height: 1.8; color: #A89F8f; font-weight: 300;">Gurkha regiments have served under British, Indian and Nepali colours since 1815, and the terms of that service — pay, pensions, citizenship — are still being negotiated today. We are not going to flatten two centuries of that into a slogan. The watch that carries the name is a plain field watch, and it does not wear anyone's insignia.</p>
         </div>
       </div>
 
@@ -517,8 +639,11 @@
     <div style="max-width: 1280px; margin: 0 auto; padding: 28px 40px 40px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: start;">
       <!-- GALLERY -->
       <div style="position: sticky; top: 128px;">
-        <div style="aspect-ratio: 1; border: 1px solid #2b2720; overflow: hidden; margin-bottom: 10px; background:#17130e;">
-          <image-slot id="{{ P.mainImgId }}" shape="rect" fit="cover" src="{{ P.mainImg }}" placeholder="{{ P.name }} — {{ P.activeShot }}"></image-slot>
+        <div style="position: relative; aspect-ratio: 1; border: 1px solid #2b2720; overflow: hidden; margin-bottom: 10px; background:#17130e;">
+          {{ P.watchEl }}
+          <sc-if value="{{ P.canFlip }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ P.flipToggle }}" class="wa-flip" aria-pressed="{{ P.flipped }}">{{ P.flipLabel }}</button>
+          </sc-if>
         </div>
         <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
           <sc-for list="{{ P.gallery }}" as="g" hint-placeholder-count="5">
@@ -602,7 +727,7 @@
         <sc-if value="{{ P.tabSpecs }}" hint-placeholder-val="{{ false }}">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background:#2b2720; border:1px solid #2b2720; max-width: 900px;">
             <sc-for list="{{ P.specs }}" as="s" hint-placeholder-count="12">
-              <div style="background:#17130e; padding: 18px 20px;"><div style="font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:#A07C46; margin-bottom:6px;">{{ s.label }}</div><div style="font-size:14.5px; color:#E9E3D6;">{{ s.value }}</div></div>
+              <div style="background:#17130e; padding: 18px 20px;"><div style="font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:#A07C46; margin-bottom:6px;">{{ s.label }}</div><div class="spec" style="font-size:13.5px; color:#E9E3D6;">{{ s.value }}</div></div>
             </sc-for>
           </div>
         </sc-if>
@@ -999,7 +1124,7 @@ class Component extends DCLogic {
       discInput: "", discCode: null, discMsg: "", discOk: false,
       shipMethod: "standard", payMethod: "card",
       // product view
-      qty: 1, strap: null, tab: "story", gallIdx: 0,
+      qty: 1, strap: null, tab: "story", gallIdx: 0, flipped: false,
       reviewFormOpen: false, userReviews: {},
       rvName: "", rvRating: "5", rvTitle: "", rvText: "",
       // engraving
@@ -1025,6 +1150,33 @@ class Component extends DCLogic {
       this.reveal();
     };
     window.addEventListener("scroll", this._onScroll, { passive: true });
+
+    // Pointer tilt. One delegated listener for every watch on the page; the
+    // stage writes its own custom properties so CSS does the animating.
+    // Capped at 6 degrees — past that a watch stops looking photographed and
+    // starts looking like a 3D toy. Skipped entirely under reduced motion.
+    this._reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)");
+    this._onMove = (e) => {
+      if (this._reduce && this._reduce.matches) return;
+      const stage = e.target && e.target.closest && e.target.closest(".wa-stage");
+      if (this._lastStage && this._lastStage !== stage) this._resetTilt(this._lastStage);
+      this._lastStage = stage;
+      if (!stage) return;
+      const r = stage.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const nx = (e.clientX - r.left) / r.width - 0.5;
+      const ny = (e.clientY - r.top) / r.height - 0.5;
+      const MAX = 6;
+      stage.style.setProperty("--wa-ty", (nx * 2 * MAX).toFixed(2) + "deg");
+      stage.style.setProperty("--wa-tx", (-ny * 2 * MAX).toFixed(2) + "deg");
+      // The glare slides the opposite way, so the highlight reads as a
+      // reflection rather than as a decal stuck to the crystal.
+      stage.style.setProperty("--wa-gx", (-nx * 46).toFixed(1) + "px");
+      stage.style.setProperty("--wa-gy", (-ny * 46).toFixed(1) + "px");
+    };
+    this._onLeave = () => { if (this._lastStage) { this._resetTilt(this._lastStage); this._lastStage = null; } };
+    window.addEventListener("pointermove", this._onMove, { passive: true });
+    window.addEventListener("pointerleave", this._onLeave, { passive: true });
     this._tick = setInterval(() => this.reveal(), 400);
     requestAnimationFrame(() => this.reveal());
     setTimeout(() => this.reveal(), 200);
@@ -1037,8 +1189,13 @@ class Component extends DCLogic {
       if (this.state.orders) localStorage.setItem("nepal_orders", JSON.stringify(this.state.orders));
     } catch (e) {}
   }
+  _resetTilt(el) {
+    ["--wa-tx", "--wa-ty", "--wa-gx", "--wa-gy"].forEach(k => el.style.removeProperty(k));
+  }
   componentWillUnmount() {
     window.removeEventListener("scroll", this._onScroll);
+    window.removeEventListener("pointermove", this._onMove);
+    window.removeEventListener("pointerleave", this._onLeave);
     if (this._tick) clearInterval(this._tick);
   }
   reveal() {
@@ -1050,7 +1207,7 @@ class Component extends DCLogic {
   stars(r) { const f = Math.round(r); return "★★★★★".slice(0, f) + "☆☆☆☆☆".slice(0, 5 - f); }
   showToast(m) { this.setState({ toast: m }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: "" }), 2600); }
   go(view, slug) {
-    this.setState({ view, slug: slug || null, cartOpen: false, quickSlug: null, navScrolled: view !== "home" });
+    this.setState({ view, slug: slug || null, cartOpen: false, quickSlug: null, navScrolled: view !== "home", gallIdx: 0, flipped: false });
     window.scrollTo(0, 0);
   }
   goAnchor(id) {
@@ -1062,28 +1219,31 @@ class Component extends DCLogic {
     return [
       { slug: "everest", name: "Everest Summit 8848", collection: "Everest", inspiration: "Mount Everest — the highest point on Earth", price: 449, compareAt: 0, badge: "Bestseller", inventory: 38, bestseller: true, featured: true, limited: false, caseSize: 40, caseMaterial: "Brushed titanium", dialColor: "White", movement: "Automatic", movementMfr: "Miyota 9039 (Japan)", crystal: "Sapphire, AR-coated", wr: "100 m", strapType: "Leather", strapColor: "Blue leather", power: "42 hr", warranty: "5 years", region: "Koshi · Solukhumbu", engraving: "“8,848.86 m” + Everest silhouette", packaging: "Expedition-style keepsake box", rating: 4.9, reviewCount: 42, sort: 1,
         shortDesc: "A glacier-white textured dial and ice-blue markings crowned by a titanium case — built for those who reach for the top.",
-        story: "At 8,848.86 metres, Everest is the measure of human ambition.\n\nThe Summit 8848 translates that altitude into a glacier-white dial with a fine topographic texture, ice-blue minute markings, and a deep-blue second hand that sweeps like a climber's rope. The case back carries the Everest ridgeline and the exact height in metres — a quiet reminder that every journey has a summit." },
+        story: "Everest is not the hardest of the eight-thousanders, and everyone who climbs it knows that. What it is, is the highest — 8,848.86 metres by the joint Nepal–China resurvey of 2020 — and the thin air above 8,000 metres kills whether or not the climbing is technical.\n\nNepal calls it Sagarmāthā, “forehead of the sky.” Tibet calls it Chomolungma, “goddess mother of the world.” Both names were in use for generations before it was given a surveyor's.\n\nEdmund Hillary and Tenzing Norgay Sherpa reached the summit on 29 May 1953, on the British expedition led by John Hunt. They stayed about fifteen minutes. Tenzing buried an offering of sweets and biscuits in the snow. Neither man would ever say which of them stepped up first.\n\nThe Summit 8848 is the field watch this collection is built around: a glacier-white sunburst that lifts along one axis, a brushed titanium case, and the Everest ridgeline standing in for the 12 marker — applied, not printed, so it catches light like the rest of them. The exact height is engraved on the back." },
       { slug: "annapurna", name: "Annapurna Explorer", collection: "Annapurna Series", inspiration: "The Annapurna range and its trekking routes", price: 389, compareAt: 0, badge: "Heritage", inventory: 24, bestseller: false, featured: true, limited: false, caseSize: 41, caseMaterial: "Antique bronze-tone", dialColor: "Cream", movement: "Automatic", movementMfr: "Seiko NH35 (Japan)", crystal: "Mineral, domed", wr: "100 m", strapType: "Leather", strapColor: "Brown distressed leather", power: "41 hr", warranty: "5 years", region: "Gandaki · Kaski", engraving: "Annapurna coordinates 28.5961° N", packaging: "Waxed-canvas field roll", rating: 4.7, reviewCount: 31, sort: 2,
         shortDesc: "A warm cream dial, vintage Arabic numerals, and a compass-inspired minute track — a rugged field watch for the long trail.",
-        story: "Annapurna I was the first 8,000-metre peak ever climbed, in 1950.\n\nThe Explorer answers that pioneering spirit with a warm cream dial, hand-drawn vintage numerals, and a compass minute track for the trekker who still reads the land. Its antique bronze tone deepens with wear, and the coordinates on the case back point home to the massif above Pokhara." },
+        story: "Annapurna I was the first eight-thousander anyone climbed, three years before Everest. It is also the one that has taken the most: it still carries the highest ratio of deaths to summits of the fourteen.\n\nThe name is Sanskrit — “full of food,” the goddess of the harvests. A mountain named for being fed by, at the head of a valley that feeds people.\n\nMaurice Herzog and Louis Lachenal summited on 3 June 1950 with the French expedition. Their maps were wrong; the team spent weeks simply finding the mountain before they could start up it. Both lost fingers and toes to frostbite coming down.\n\nThe Explorer refuses ornament, because the mountain does not offer any. A matte bronze tool watch, painted numerals, a date legible in bad light, and Annapurna's long serrated ridge cut as the seconds-hand counterweight — the one piece of the watch that never stops moving." },
       { slug: "machhapuchhre", name: "Machhapuchhre Sacred Peak", collection: "Annapurna Series", inspiration: "The sacred, unclimbed fishtail mountain", price: 429, compareAt: 0, badge: "Limited Edition", inventory: 18, bestseller: false, featured: false, limited: true, caseSize: 39, caseMaterial: "Polished & brushed steel", dialColor: "Teal", movement: "Automatic", movementMfr: "Miyota 9015 (Japan)", crystal: "Domed sapphire", wr: "50 m", strapType: "Leather", strapColor: "Grey leather", power: "42 hr", warranty: "5 years", region: "Gandaki · Kaski", engraving: "Fishtail silhouette", packaging: "Minimal slate keepsake box", rating: 4.8, reviewCount: 16, sort: 3,
         shortDesc: "A deep teal dial carries a subtle fishtail pattern and clean, minimal markers — quiet and spiritual, like the peak itself.",
-        story: "Machhapuchhre has never been summited. Out of respect for its sacred status, climbing is forbidden.\n\nThe Sacred Peak honours that restraint: a deep teal dial with only a whisper of the fishtail ridge, no date, no clutter. It is a watch about what we choose to leave untouched." },
+        story: "Machapuchare — the fishtail — rises at the head of the Modi Khola with twin points that read as one peak from Pokhara and as two from the sanctuary below it. It has never been summited.\n\nIn 1957 a British party led by Jimmy Roberts reached about 50 metres below the top and turned around, having undertaken not to set foot on the summit. At Roberts's own request Nepal then closed the mountain. It has stayed closed ever since, because it is held to be the home of Shiva. Trekking the sanctuary beneath it is welcomed; climbing it is not.\n\nThe Sacred Peak is a watch about restraint. Deep teal sunburst, polished steel, no date, no lume, no seconds complication — and the fishtail ridge applied at 12, the one place it appears. A piece about what we choose to leave alone." },
+      { slug: "chooyu", name: "Cho Oyu Turquoise Goddess", collection: "Cho Oyu", inspiration: "Cho Oyu — the Turquoise Goddess", price: 399, compareAt: 0, badge: "New Arrival", inventory: 26, bestseller: false, featured: true, limited: false, caseSize: 39, caseMaterial: "Brushed steel", dialColor: "Teal", movement: "Automatic", movementMfr: "Miyota 9039 (Japan)", crystal: "Sapphire, AR-coated", wr: "100 m", strapType: "Leather", strapColor: "Warm brown leather", power: "42 hr", warranty: "5 years", region: "Koshi · Solukhumbu", engraving: "\u201c8,188 m\u201d + Cho Oyu profile", packaging: "Turquoise-lined keepsake box", rating: 4.8, reviewCount: 5, sort: 5,
+        shortDesc: "A turquoise sunburst dial under brushed steel, with painted numerals and nothing competing \u2014 the colour the Turquoise Goddess turns in late light.",
+        story: "Cho Oyu is the sixth-highest mountain on Earth and the least steep of Nepal's eight, a broad flat-topped whaleback twenty kilometres west of Everest. That gentler profile is why it is often a climber's first eight-thousander — and the reason people underestimate it.\n\nThe name means “Turquoise Goddess,” for the colour the face turns in late light.\n\nHerbert Tichy, Joseph Jöchler and Pasang Dawa Lama reached the summit on 19 October 1954 with the Austrian expedition. No oxygen, no radio, and a team small enough to sleep in one tent — against the siege expeditions of the day it was almost heretical. It stood as the highest point ever reached without supplementary oxygen until Messner and Habeler climbed Everest in 1978.\n\nThe peak is named for a colour, so the watch is built around one. A turquoise sunburst dial that lifts along a single axis and goes deep at the rim, painted Arabic numerals, brushed steel, and the Cho Oyu profile cut as the seconds-hand counterweight." },
       { slug: "dhaulagiri", name: "Dhaulagiri White Mountain", collection: "Dhaulagiri", inspiration: "Dhaulagiri — the White Mountain", price: 279, compareAt: 329, badge: "Minimal", inventory: 42, bestseller: false, featured: true, limited: false, caseSize: 40, caseMaterial: "Stainless steel", dialColor: "White", movement: "Quartz", movementMfr: "Ronda 715 (Swiss)", crystal: "Sapphire", wr: "50 m", strapType: "Leather", strapColor: "Grey leather", power: "Battery, 5 yr", warranty: "3 years", region: "Gandaki · Myagdi", engraving: "Mountain-ridge relief", packaging: "White & silver minimalist sleeve", rating: 4.6, reviewCount: 27, sort: 4,
         shortDesc: "Matte-white dial, silver hands, and an ice-grey minute track. Pure, calm, and endlessly wearable.",
-        story: "Dhaulagiri means “White Mountain” in Sanskrit.\n\nThe White Mountain keeps everything essential and nothing more: a matte-white dial, applied silver indexes, and a cool ice-grey track. Swiss quartz keeps it precise and slim enough to slip under any cuff." },
+        story: "Dhaulagiri I stands alone above the Kali Gandaki, a white dome with a long north-east spur and no neighbour tall enough to shelter it. From its European discovery in 1808 until 1838 it was believed to be the highest mountain on Earth. Then the survey caught up with it and it became the seventh.\n\nThe name is Sanskrit — dhawala giri, “dazzling white mountain.”\n\nThe first ascent came on 13 May 1960: Kurt Diemberger, Peter Diener, Ernst Forrer, Albin Schelbert, Nyima Dorje Sherpa and Nawang Dorje Sherpa, on the Swiss–Austrian expedition. They flew a Pilatus Porter onto the glacier to land supplies high on the mountain — the first time an aircraft supported a Himalayan climb.\n\nThirty years as the tallest thing anyone knew of, then a quiet reassignment. The White Mountain keeps that composure: the smallest case here at 38 mm, a white sunburst dial under high-polish steel, no date, no lume, and the ridgeline engraved on the back where nobody else sees it." },
       { slug: "manaslu", name: "Manaslu Spirit", collection: "Manaslu", inspiration: "Manaslu — the Mountain of the Spirit", price: 419, compareAt: 0, badge: "New Arrival", inventory: 31, bestseller: false, featured: false, limited: false, caseSize: 40, caseMaterial: "Brushed steel", dialColor: "Navy", movement: "Automatic", movementMfr: "Seiko NH35 (Japan)", crystal: "Sapphire", wr: "100 m", strapType: "Leather", strapColor: "Navy leather", power: "41 hr", warranty: "5 years", region: "Gandaki · Gorkha", engraving: "Exhibition case back", packaging: "Indigo keepsake box", rating: 4.7, reviewCount: 19, sort: 5,
         shortDesc: "A dark-navy dial with a subtle mandala texture and light-blue luminous hands — balance and inner strength.",
-        story: "Manaslu means “Mountain of the Spirit,” from the Sanskrit manasa.\n\nSpirit renders that idea as a mandala-textured navy dial, drawn in concentric balance, with luminous hands the colour of high-altitude sky. Through the exhibition case back you watch the movement breathe." },
+        story: "Manaslu rises above the Budhi Gandaki in Gorkha, twin summit pinnacles over a broad plateau, and it is entirely within Nepal. The long summit ridge is corniced most of its length, which is what makes the final stretch serious.\n\nThe name comes from the Sanskrit manasa — intellect, or soul. It is usually given in English as “mountain of the spirit.”\n\nToshio Imanishi and Gyalzen Norbu Sherpa made the first ascent on 9 May 1956 with the Japanese expedition. Gyalzen Norbu had stood on Makalu the year before. On Manaslu he was not carrying someone else's attempt — he was one of the two men who made it.\n\nSpirit answers an inward name with an inward dial: deep navy lacquer, near-black where it meets the case, round applied markers set like beads around it, and Manaslu's twin pinnacles applied at 12. Through the exhibition back you can watch the movement work." },
       { slug: "kanchenjunga", name: "Kanchenjunga Five Treasures", collection: "Kanchenjunga", inspiration: "The five treasures of the high snow", price: 549, compareAt: 0, badge: "Numbered Edition", inventory: 12, bestseller: false, featured: false, limited: true, caseSize: 41, caseMaterial: "Steel with gold-tone", dialColor: "Green", movement: "Automatic", movementMfr: "Miyota 9015 (Japan)", crystal: "Sapphire", wr: "100 m", strapType: "Leather", strapColor: "Brown leather", power: "42 hr", warranty: "5 years", region: "Koshi · Taplejung", engraving: "Numbered edition, mountain range", packaging: "Numbered collector's chest", rating: 4.9, reviewCount: 11, sort: 6,
         shortDesc: "A forest-green dial with five gold accent markers and a cream track. Rare, prestigious, individually numbered.",
-        story: "Kanchenjunga's name means “Five Treasures of the High Snow.”\n\nFive Treasures marks those treasures with five gold indexes on a deep forest-green dial, framed by a cream minute track. Each piece is numbered on the case back — a small, permanent membership in something rare." },
+        story: "Kangchenjunga is the third-highest mountain on Earth, a five-summit massif on the Nepal–Sikkim border, and it is worshipped from both sides of that line.\n\nThe name means “Five Treasures of the Great Snow.” The five summits are read as the storehouses of a god — salt, gold, turquoise, grain, and holy books.\n\nGeorge Band and Joe Brown reached the top on 25 May 1955 with the British expedition led by Charles Evans, and then stopped a few feet short of the true summit. They had promised the Chogyal of Sikkim that the highest point itself would stay untrodden. Every party since has kept the same convention — seventy years of climbers choosing to stop.\n\nA mountain treated that way asks for a watch that does not raise its voice. Five Treasures is the quietest piece in the collection: deep green lacquer going almost black at the rim, high-polish gold, no date, no lume, five gold markers for the five treasures. The summit profile is on the case back, out of sight." },
       { slug: "lhotse", name: "Lhotse Silent Giant", collection: "Lhotse", inspiration: "Lhotse — Everest's dramatic neighbour", price: 349, compareAt: 0, badge: "Adventure Series", inventory: 27, bestseller: false, featured: false, limited: false, caseSize: 42, caseMaterial: "Matte-charcoal steel", dialColor: "Black", movement: "Chronograph", movementMfr: "Seiko VK64 mecha-quartz", crystal: "Sapphire", wr: "100 m", strapType: "Canvas", strapColor: "Black canvas", power: "Battery, 3 yr", warranty: "3 years", region: "Koshi · Solukhumbu", engraving: "Expedition coordinates", packaging: "Rugged field case", rating: 4.6, reviewCount: 22, sort: 7,
         shortDesc: "Matte-black dial, sharp geometric ridgelines, and a single orange second hand. Bold, modern, understated.",
-        story: "Lhotse rises just south of Everest — the fourth-highest mountain, forever in a giant's shadow, yet fierce in its own right.\n\nSilent Giant is all restraint and edge: a matte-black dial, geometric mountain facets, and one flash of orange on the chronograph second hand. Quiet until it moves." },
+        story: "Lhotse is the fourth-highest mountain in the world and shares the South Col with Everest, so for two months a year the same camp serves both. Climbers walk a common route to about 7,900 metres and only then turn away from one another.\n\nThe name is Tibetan for “south peak.” It is named for its position on the Everest massif rather than for anything of its own — which tells you how the mountain has been seen.\n\nFritz Luchsinger and Ernst Reiss made the first ascent on 18 May 1956 with the Swiss expedition. The Lhotse Face they climbed to get there is the same wall every Everest party still ascends.\n\nOne col, two mountains — so one dial, two time zones. Silent Giant is a blackened GMT: a matte dial, a 24-hour track in orange, and rhodium markers that keep it readable at altitude. Lhotse's ridge is cut as the counterweight on the seconds hand." },
       { slug: "makalu", name: "Makalu Pyramid", collection: "Makalu", inspiration: "Makalu's four-sided pyramid summit", price: 479, compareAt: 0, badge: "Architectural", inventory: 20, bestseller: false, featured: false, limited: false, caseSize: 41, caseMaterial: "Graphite steel", dialColor: "Black", movement: "Automatic", movementMfr: "Miyota 9015 (Japan)", crystal: "Sapphire", wr: "100 m", strapType: "Metal", strapColor: "Black metal bracelet", power: "42 hr", warranty: "5 years", region: "Koshi · Sankhuwasabha", engraving: "Makalu silhouette on crown", packaging: "Graphite architectural box", rating: 4.8, reviewCount: 14, sort: 8,
         shortDesc: "A black textured dial with copper hands and angular markers, on a graphite bracelet. Architectural and refined.",
-        story: "Makalu is a near-perfect four-sided pyramid, one of the most striking forms in the Himalaya.\n\nPyramid answers with angular applied markers, copper-toned hands, and a textured black dial on a graphite bracelet. The summit silhouette is etched into the crown — you feel the mountain each time you set the time." },
+        story: "Makalu stands twenty kilometres east of Everest and belongs to nothing — an isolated four-sided pyramid with four sharp ridges and no easy line on any of them. The summit pyramid is exposed rock and ice at 8,485 metres, which is why it has seen a fraction of Everest's traffic.\n\nThe name comes from Mahākāla, a wrathful protector deity. It is not a description of the rock. It is a description of what the mountain was understood to be.\n\nLionel Terray and Jean Couzy summited on 15 May 1955 with the French expedition led by Jean Franco. Over the next two days the rest of the team followed, among them Gyalzen Norbu Sherpa — who would make the first ascent of Manaslu twelve months later.\n\nPyramid is the most severe watch here, and deliberately so: blackened ceramic, a coin-edge bezel, and arrowhead markers in rhodium so a near-black dial still reads at a glance. Makalu's pyramid stands at 12, applied in the same metal as the markers." },
       { slug: "gurkha", name: "Gurkha Legacy Field Watch", collection: "Gurkha Legacy", inspiration: "Gurkha courage, discipline, and loyalty", price: 399, compareAt: 0, badge: "Gurkha Heritage", inventory: 35, bestseller: true, featured: true, limited: false, caseSize: 40, caseMaterial: "Brushed steel", dialColor: "Green", movement: "Automatic", movementMfr: "Seiko NH35 (Japan)", crystal: "Sapphire", wr: "100 m", strapType: "Canvas", strapColor: "Green canvas & leather", power: "41 hr", warranty: "5 years", region: "Gandaki · Gorkha", engraving: "Subtle khukuri motif + heritage note", packaging: "Field-equipment-inspired case", rating: 4.9, reviewCount: 38, sort: 9,
         shortDesc: "A Gurkha-green dial with highly legible luminous numerals and a red-tipped second hand. Courage, worn quietly.",
         story: "For over two centuries the Gurkha soldier has stood for courage, discipline, and loyalty.\n\nThe Legacy Field Watch honours that heritage with restraint — a Gurkha-green dial, clear luminous numerals for instant reading, and a subtle crossed-khukuri motif on the case back. It is a tribute, not a costume: built to be dependable, exactly as its namesake." },
@@ -1104,7 +1264,7 @@ class Component extends DCLogic {
         story: "Upper Mustang was a forbidden kingdom until 1992 — a high desert of ochre cliffs, whitewashed monasteries, and the walled city of Lo Manthang.\n\nWalled City takes that palette into an ochre dial with markers shaped like carved temple windows, cased in antique bronze that ages like the walls themselves. A relic of a hidden Himalaya." },
       { slug: "sagarmatha", name: "Sagarmatha Expedition", collection: "Expedition", inspiration: "Everest expeditions and high-altitude travel", price: 599, compareAt: 0, badge: "Numbered Edition", inventory: 10, bestseller: false, featured: true, limited: true, caseSize: 42, caseMaterial: "Titanium", dialColor: "Black", movement: "Automatic", movementMfr: "Miyota 9075 GMT (Japan)", crystal: "Sapphire", wr: "200 m", strapType: "Metal", strapColor: "Titanium bracelet", power: "42 hr", warranty: "5 years", region: "Koshi · Solukhumbu", engraving: "Numbered summit-log case back", packaging: "Sealed expedition hard case", rating: 4.9, reviewCount: 6, sort: 15,
         shortDesc: "A pro-grade black GMT with an orange 24-hour hand and 200 m depth — a numbered tool watch built for the summit push.",
-        story: "Sagarmatha — “Goddess of the Sky” — is Everest's Nepali name, and this is the expedition tool made in her honour.\n\nThe Expedition is the collection's most capable piece: a titanium GMT tracking a second time zone home, a high-visibility orange 24-hour hand, 200 m of water resistance, and a numbered summit-log case back. Built for the people who actually go." },
+        story: "Sagarmāthā — “forehead of the sky” — is Everest's Nepali name, and this is the expedition tool built in its honour.\n\nThe Expedition is the collection's most capable piece: a titanium GMT tracking a second time zone home, a high-visibility orange 24-hour hand, 200 m of water resistance, and a numbered summit-log case back. Built for the people who actually go." },
       { slug: "sherpa", name: "Sherpa Heritage", collection: "Sherpa Heritage", inspiration: "The Sherpa people of the high Himalaya", price: 419, compareAt: 0, badge: "Heritage", inventory: 22, bestseller: false, featured: false, limited: false, caseSize: 40, caseMaterial: "Antique bronze-tone", dialColor: "Cream", movement: "Automatic", movementMfr: "Seiko NH35 (Japan)", crystal: "Sapphire", wr: "100 m", strapType: "Leather", strapColor: "Warm brown leather", power: "41 hr", warranty: "5 years", region: "Koshi · Solukhumbu", engraving: "Prayer-bead ring + tribute note", packaging: "Handwoven-fabric-lined box", rating: 4.8, reviewCount: 11, sort: 16,
         shortDesc: "A warm cream dial with prayer-bead minute markers and a bronze case — a respectful tribute to the mountaineers of the high snow.",
         story: "No summit is reached without the Sherpa — the mountaineers, guides, and communities whose skill and generosity carry every expedition.\n\nHeritage honours them with a warm cream dial ringed by prayer-bead markers, a bronze case that warms with wear, and a tribute engraved on the back. A thank-you you can wear." }
@@ -1112,215 +1272,989 @@ class Component extends DCLogic {
   }
   productBySlug(slug) { return this.baseProducts().find(p => p.slug === slug); }
 
-  wpal(p) {
-    const dialMap = { White: ["#e9e6de", "#cfccc2"], Cream: ["#e8dcbf", "#cdbf9a"], Teal: ["#1c4a49", "#0f3231"], Navy: ["#1b2740", "#0f1830"], Green: ["#33422f", "#212d1e"], Black: ["#17171a", "#0c0c0e"], Red: ["#71271f", "#4c1712"], Ochre: ["#b5722e", "#8a531c"] };
-    const cm = (p.caseMaterial || "").toLowerCase();
-    let caseLt = "#cfd2d5", caseDk = "#8b8f93";
-    if (cm.indexOf("bronze") >= 0) { caseLt = "#c79a58"; caseDk = "#7e5a30"; }
-    else if (cm.indexOf("gold") >= 0) { caseLt = "#d0af6a"; caseDk = "#8f7436"; }
-    else if (cm.indexOf("graphite") >= 0 || cm.indexOf("charcoal") >= 0) { caseLt = "#4a4d51"; caseDk = "#26282b"; }
-    else if (cm.indexOf("titanium") >= 0) { caseLt = "#c2c6c9"; caseDk = "#7c8185"; }
-    const accent = { everest: "#6fa8c7", annapurna: "#b07a3c", machhapuchhre: "#bcd3cf", dhaulagiri: "#9fb4c0", manaslu: "#8fb2d6", kanchenjunga: "#d0a94e", lhotse: "#e8792e", makalu: "#b5714a", gurkha: "#b23b30", kathmandu: "#d8c48f", amadablam: "#7fb4d6", langtang: "#b0a24a", tilicho: "#3bc0bf", mustang: "#7c2f28", sagarmatha: "#e8792e", sherpa: "#c46a3a" }[p.slug] || "#c0a05a";
-    const marker = { everest: "index", annapurna: "arabic", machhapuchhre: "stick", dhaulagiri: "stick", manaslu: "dots", kanchenjunga: "fiveDots", lhotse: "index", makalu: "index", gurkha: "arabic", kathmandu: "temple", amadablam: "stick", langtang: "arabic", tilicho: "dots", mustang: "temple", sagarmatha: "index", sherpa: "dots" }[p.slug] || "index";
-    const sig = { everest: "contour", annapurna: "compass", machhapuchhre: "fishtail", dhaulagiri: "ridge", manaslu: "mandala", kanchenjunga: "none", lhotse: "facets", makalu: "pyramid", gurkha: "khukuri", kathmandu: "mandala", amadablam: "contour", langtang: "contour", tilicho: "ripples", mustang: "temple", sagarmatha: "gmt", sherpa: "ripples" }[p.slug] || "none";
-    const scene = { everest: "everest", annapurna: "range", amadablam: "amadablam", machhapuchhre: "fishtail", tilicho: "dome", langtang: "valley" }[p.slug] || "range";
-    const caseGold = /gold|bronze/.test(cm);
-    const style = { kanchenjunga: "chrono", lhotse: "chrono", sagarmatha: "chrono", makalu: "octagon", kathmandu: "guilloche", mustang: "guilloche", sherpa: "guilloche", dhaulagiri: "guilloche", gurkha: "guilloche", manaslu: "guilloche" }[p.slug] || "scene";
-    const scenic = style === "scene";
-    const bezel = style === "chrono" ? "tachy" : style === "octagon" ? "octagon" : (caseGold ? "fluted" : "plain");
-    const warm = false;
-    const scol = (p.strapColor || "").toLowerCase();
-    let strapHex = "#5c3d24";
-    if (p.strapType === "Canvas") strapHex = (scol.indexOf("moss") >= 0 || scol.indexOf("green") >= 0) ? "#4c5334" : "#5d5c3a";
-    else if (p.strapType === "Metal") strapHex = "#8f9398";
-    else if (scol.indexOf("blue") >= 0 || scol.indexOf("navy") >= 0) strapHex = "#2f4258";
-    else if (scol.indexOf("ice") >= 0) strapHex = "#5b6b7a";
-    else if (scol.indexOf("grey") >= 0 || scol.indexOf("gray") >= 0) strapHex = "#565758";
-    else strapHex = "#5c3d24";
-    const light = ["White", "Cream", "Ochre"].indexOf(p.dialColor) >= 0;
-    const dc = dialMap[p.dialColor] || dialMap.Black;
-    const hasDate = ["annapurna", "langtang", "sagarmatha", "makalu"].indexOf(p.slug) >= 0;
-    const txt = scenic ? "#ece5d6" : (light ? "#2b2620" : "#e9e2d2");
-    const hand = scenic ? "#f4eede" : (light ? "#2a2620" : "#eae3d3");
-    return { dialLt: dc[0], dialDk: dc[1], caseLt, caseDk, accent, marker, sig, scene, scenic, style, bezel, caseGold, warm, strapHex, txt, hand, hasDate, light };
-  }
+  // ============================================================================
+  //  WATCH RENDERING ENGINE
+  //  One renderer, driven by a per-model spec (watchSpec). Layered SVG: every
+  //  material is base colour + directional finish + specular highlight, never a
+  //  flat fill. Geometry is held to real case proportions — see watchGeom().
+  // ============================================================================
 
   _pt(cx, cy, r, a) { const rad = (a - 90) * Math.PI / 180; return [(cx + r * Math.cos(rad)).toFixed(1), (cy + r * Math.sin(rad)).toFixed(1)]; }
 
-  sigSVG(kind, cx, cy, col) {
-    const o = "opacity='0.14'";
-    if (kind === "contour") return `<g fill='none' stroke='${col}' stroke-width='1.4' ${o}><path d='M150 300 C 190 285 230 315 270 298 S 340 285 350 292'/><path d='M150 320 C 195 305 235 332 275 316 S 338 306 350 312'/><path d='M150 282 C 190 268 232 295 272 280 S 340 268 350 274'/></g>`;
-    if (kind === "ripples") return `<g fill='none' stroke='${col}' stroke-width='1.4' ${o}><circle cx='${cx}' cy='${cy}' r='34'/><circle cx='${cx}' cy='${cy}' r='58'/><circle cx='${cx}' cy='${cy}' r='82'/></g>`;
-    if (kind === "mandala") return `<g fill='none' stroke='${col}' stroke-width='1.2' ${o}><circle cx='${cx}' cy='${cy}' r='40'/><circle cx='${cx}' cy='${cy}' r='66'/><path d='M${cx} ${cy - 78} L${cx + 22} ${cy} L${cx} ${cy + 78} L${cx - 22} ${cy} Z'/><path d='M${cx - 78} ${cy} L${cx} ${cy - 22} L${cx + 78} ${cy} L${cx} ${cy + 22} Z'/></g>`;
-    if (kind === "pyramid") return `<path d='M${cx} ${cy - 66} L${cx + 62} ${cy + 60} L${cx - 62} ${cy + 60} Z' fill='none' stroke='${col}' stroke-width='1.6' ${o}/>`;
-    if (kind === "facets") return `<g fill='none' stroke='${col}' stroke-width='1.4' ${o}><path d='M${cx} ${cy - 70} L${cx + 46} ${cy + 56} L${cx - 46} ${cy + 56} Z'/><path d='M${cx} ${cy - 70} L${cx} ${cy + 56}'/></g>`;
-    if (kind === "fishtail") return `<path d='M${cx - 44} ${cy + 40} L${cx} ${cy - 68} L${cx + 44} ${cy + 40} M${cx} ${cy - 68} L${cx - 16} ${cy - 38} M${cx} ${cy - 68} L${cx + 16} ${cy - 38}' fill='none' stroke='${col}' stroke-width='1.6' ${o}/>`;
-    if (kind === "temple") return `<g fill='none' stroke='${col}' stroke-width='1.4' ${o}><path d='M${cx - 60} ${cy + 6} L${cx} ${cy - 30} L${cx + 60} ${cy + 6}'/><path d='M${cx - 46} ${cy + 34} L${cx} ${cy + 4} L${cx + 46} ${cy + 34}'/></g>`;
-    if (kind === "compass") return `<g fill='none' stroke='${col}' stroke-width='1.3' ${o}><circle cx='${cx}' cy='${cy}' r='62'/><path d='M${cx} ${cy - 62} L${cx + 12} ${cy} L${cx} ${cy + 62} L${cx - 12} ${cy} Z' fill='${col}' stroke='none' opacity='0.1'/></g>`;
-    if (kind === "khukuri") return `<path d='M${cx - 60} ${cy - 26} C ${cx - 10} ${cy - 40} ${cx + 40} ${cy - 10} ${cx + 60} ${cy + 34} L ${cx + 50} ${cy + 40} C ${cx + 24} ${cy + 6} ${cx - 16} ${cy - 14} ${cx - 58} ${cy - 14} Z' fill='${col}' ${o}/>`;
-    if (kind === "gmt") return `<g fill='none' stroke='${col}' stroke-width='1.2' ${o}><circle cx='${cx}' cy='${cy}' r='70' stroke-dasharray='2 10'/></g>`;
-    if (kind === "ridge") return `<path d='M148 316 L200 276 L236 300 L286 268 L352 312' fill='none' stroke='${col}' stroke-width='1.6' ${o}/>`;
-    return "";
-  }
+  // --- colour maths -----------------------------------------------------------
+  _hx(h) { h = h.replace("#", ""); if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]; const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  _rgb(a) { return "#" + a.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join(""); }
+  _shade(hex, amt) { const c = this._hx(hex); return this._rgb(c.map(v => amt >= 0 ? v + (255 - v) * amt : v * (1 + amt))); }
+  _mix(a, b, t) { const x = this._hx(a), y = this._hx(b); return this._rgb([0, 1, 2].map(i => x[i] + (y[i] - x[i]) * t)); }
+  _alpha(hex, a) { const c = this._hx(hex); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
 
-  strapSVG(type, hex) {
-    if (type === "Metal") {
-      const link = (x, y, w) => `<rect x='${x}' y='${y}' width='${w}' height='17' rx='4' fill='url(#lnk)' stroke='rgba(0,0,0,.28)' stroke-width='0.6'/>`;
-      let s = "", rows = [];
-      for (let y = 16; y < 152; y += 21) rows.push(y);
-      for (let y = 452; y < 584; y += 21) rows.push(y);
-      rows.forEach(y => { s += link(184, y, 30) + link(217, y, 46) + link(266, y, 30); });
-      return s;
-    }
-    const stitch = (x1, y1, x2, y2) => `<line x1='${x1}' y1='${y1}' x2='${x2}' y2='${y2}' stroke='rgba(0,0,0,.42)' stroke-width='1.4' stroke-dasharray='5 4'/>`;
-    let top = `<path d='M196 18 Q194 14 200 14 H280 Q286 14 284 18 L302 154 H178 Z' fill='${hex}'/><rect x='230' y='16' width='20' height='138' fill='rgba(255,255,255,.09)'/>` + stitch(197, 24, 191, 150) + stitch(283, 24, 301, 150);
-    let bot = `<path d='M178 448 L302 448 L286 566 Q286 584 268 584 H212 Q194 584 194 566 Z' fill='${hex}'/><rect x='230' y='450' width='20' height='120' fill='rgba(255,255,255,.09)'/>` + stitch(197, 452, 206, 542) + stitch(283, 452, 274, 542);
-    top += `<rect x='190' y='94' width='100' height='15' rx='3' fill='rgba(0,0,0,.3)'/>`;
-    bot += `<rect x='212' y='548' width='56' height='30' rx='4' fill='none' stroke='#cfd2d5' stroke-width='5'/><line x1='240' y1='548' x2='240' y2='578' stroke='#cfd2d5' stroke-width='4'/>`;
-    if (type === "Canvas") { let w = ""; for (let y = 22; y < 152; y += 9) w += `<line x1='182' y1='${y}' x2='302' y2='${y - 6}' stroke='rgba(0,0,0,.13)' stroke-width='2'/>`; for (let y = 456; y < 574; y += 9) w += `<line x1='190' y1='${y}' x2='296' y2='${y - 6}' stroke='rgba(0,0,0,.13)' stroke-width='2'/>`; top += w; }
-    return top + bot;
-  }
-
-  bezelSVG(type, P) {
-    const cx = 240, cy = 300;
-    if (type === "tachy") {
-      const bg = P.caseGold ? "url(#ring)" : "#191a1c", num = P.caseGold ? "#3a2f18" : "#e6dfce";
-      let s = `<circle cx='${cx}' cy='${cy}' r='150' fill='${bg}'/><circle cx='${cx}' cy='${cy}' r='150' fill='none' stroke='rgba(0,0,0,.35)' stroke-width='1'/>`;
-      const v = ["400", "300", "240", "200", "175", "150", "130", "120", "110", "100", "95", "90"];
-      for (let i = 0; i < 12; i++) { const [x, y] = this._pt(cx, cy, 138, i * 30); s += `<text x='${x}' y='${(+y + 3)}' font-family='Arial,sans-serif' font-size='8.5' fill='${num}' text-anchor='middle'>${v[i]}</text>`; }
-      s += `<text x='${cx}' y='${cy - 116}' font-family='Arial,sans-serif' font-size='6' letter-spacing='1.4' fill='${num}' text-anchor='middle'>UNITS PER HOUR</text>`;
-      return s;
-    }
-    if (type === "fluted") { let s = ""; for (let i = 0; i < 72; i++) { const [ox, oy] = this._pt(cx, cy, 160, i * 5), [ix, iy] = this._pt(cx, cy, 149, i * 5); s += `<line x1='${ox}' y1='${oy}' x2='${ix}' y2='${iy}' stroke='${i % 2 ? P.caseDk : P.caseLt}' stroke-width='2.6'/>`; } return s; }
-    return `<circle cx='${cx}' cy='${cy}' r='150' fill='none' stroke='rgba(255,255,255,.22)' stroke-width='1'/>`;
-  }
-
-  batonMarkers(P, skip) {
-    const cx = 240, cy = 300; let m = "";
-    for (let i = 0; i < 12; i++) { if (i === 0) continue; if (skip && skip.indexOf(i) >= 0) continue; const a = i * 30, big = i % 3 === 0; const [ox, oy] = this._pt(cx, cy, 116, a), [ix, iy] = this._pt(cx, cy, big ? 96 : 104, a); const w = big ? 8 : 4.5; m += `<line x1='${ox}' y1='${oy}' x2='${ix}' y2='${iy}' stroke='${P.caseLt}' stroke-width='${w}' stroke-linecap='butt'/><line x1='${ox}' y1='${oy}' x2='${ix}' y2='${iy}' stroke='#cfe6df' stroke-width='${w - 3}' stroke-linecap='butt' opacity='0.75'/>`; }
-    const [tx, ty] = this._pt(cx, cy, 113, 0); m += `<path d='M${(+tx - 10)} ${(+ty + 4)} L${tx} ${(+ty - 13)} L${(+tx + 10)} ${(+ty + 4)} Z' fill='${P.caseLt}'/><path d='M${(+tx - 5)} ${(+ty + 1)} L${tx} ${(+ty - 8)} L${(+tx + 5)} ${(+ty + 1)} Z' fill='#cfe6df'/>`;
-    return m;
-  }
-
-  subdialSVG(x, y, r, face, ring, ang) {
-    let s = `<circle cx='${x}' cy='${y}' r='${r}' fill='${face}'/><circle cx='${x}' cy='${y}' r='${r}' fill='none' stroke='${ring}' stroke-width='1.6'/>`;
-    for (let k = 1; k <= 3; k++) s += `<circle cx='${x}' cy='${y}' r='${r - k * 4.5}' fill='none' stroke='rgba(0,0,0,.13)' stroke-width='0.6'/>`;
-    for (let i = 0; i < 12; i++) { const [ox, oy] = this._pt(x, y, r - 2, i * 30), [ix, iy] = this._pt(x, y, r - 5, i * 30); s += `<line x1='${ox}' y1='${oy}' x2='${ix}' y2='${iy}' stroke='rgba(0,0,0,.45)' stroke-width='0.8'/>`; }
-    const [hx, hy] = this._pt(x, y, r - 8, ang || 120); s += `<line x1='${x}' y1='${y}' x2='${hx}' y2='${hy}' stroke='#2a2620' stroke-width='1.6' stroke-linecap='round'/><circle cx='${x}' cy='${y}' r='2' fill='#2a2620'/>`;
-    return s;
-  }
-
-  guillocheSVG(P) {
-    const cx = 240, cy = 300; let s = "";
-    for (let r = 15; r < 120; r += 4.5) s += `<circle cx='${cx}' cy='${cy}' r='${r}' fill='none' stroke='rgba(0,0,0,.11)' stroke-width='0.7'/><circle cx='${cx}' cy='${cy}' r='${(r - 2).toFixed(1)}' fill='none' stroke='rgba(255,255,255,.06)' stroke-width='0.7'/>`;
-    s += this.subdialSVG(cx, cy + 52, 20, P.dialLt, P.accent, 200);
-    s += `<text x='${cx}' y='${cy + 34}' font-family='Arial,sans-serif' font-size='6' letter-spacing='1' fill='${P.txt}' text-anchor='middle' opacity='.65'>AUTOMATIC</text>`;
-    return s;
-  }
-
-  mountainScene(kind, P) {
-    const cx = 240, cy = 300;
-    const far = P.warm ? "#8a6a44" : "#8496a8";
-    const back = P.warm ? "#6a4a2c" : "#54677a";
-    const front = P.warm ? "#3c2a19" : "#2e3b48";
-    const snow = "#eef2f6", sun = P.warm ? "#f0d3a0" : "#f3e2c4";
-    const ridges = {
-      everest: [[114,392],[168,352],[206,368],[240,306],[286,360],[330,344],[366,384]],
-      amadablam: [[114,398],[172,372],[212,336],[240,304],[262,340],[306,368],[366,392]],
-      fishtail: [[114,392],[188,356],[224,318],[240,336],[256,318],[302,356],[366,392]],
-      pyramid: [[114,400],[190,372],[240,304],[292,372],[366,400]],
-      range: [[114,388],[150,356],[186,372],[222,338],[240,356],[276,330],[312,360],[344,342],[366,382]],
-      dome: [[114,396],[168,364],[206,346],[240,342],[274,346],[312,364],[366,396]],
-      valley: [[114,360],[150,346],[188,374],[240,390],[292,374],[334,346],[366,360]]
+  // --- metal library ----------------------------------------------------------
+  // Three layers per material: base colour, directional finish, specular highlight.
+  _metal(key) {
+    const M = {
+      steel:    { base: "#b9bec3", lt: "#f2f5f7", dk: "#5f666c", spec: "#ffffff" },
+      titanium: { base: "#a9aeb1", lt: "#dfe3e5", dk: "#5b6165", spec: "#f0f4f6" },
+      bronze:   { base: "#a97a44", lt: "#e6c089", dk: "#5d3f1e", spec: "#ffe9c4" },
+      gold:     { base: "#c39a4e", lt: "#f0dca4", dk: "#6d5122", spec: "#fff4d0" },
+      graphite: { base: "#4b5054", lt: "#7f868b", dk: "#1e2124", spec: "#b9c1c6" },
+      ceramic:  { base: "#232629", lt: "#4a4f54", dk: "#0e1012", spec: "#8f989e" }
     };
-    let sky = `<circle cx='${cx + 54}' cy='${cy - 54}' r='42' fill='${sun}' opacity='0.15'/><circle cx='${cx + 54}' cy='${cy - 54}' r='26' fill='${sun}' opacity='0.22'/><circle cx='${cx + 54}' cy='${cy - 54}' r='15' fill='${sun}' opacity='0.92'/>`;
-    if (kind === "skyline") {
-      // three tiered pagoda temples
-      const temple = (x, w, h) => { const b = cy + 116, t = b - h; return `<rect x='${x - w * 0.28}' y='${t + h * 0.5}' width='${w * 0.56}' height='${h * 0.5}' fill='${front}'/>` +
-        `<path d='M${x - w * 0.5} ${t + h * 0.5} L${x} ${t + h * 0.28} L${x + w * 0.5} ${t + h * 0.5} Z' fill='${back}'/>` +
-        `<path d='M${x - w * 0.36} ${t + h * 0.28} L${x} ${t + h * 0.06} L${x + w * 0.36} ${t + h * 0.28} Z' fill='${back}'/>` +
-        `<path d='M${x - w * 0.22} ${t + h * 0.08} L${x} ${t - 6} L${x + w * 0.22} ${t + h * 0.08} Z' fill='${P.accent}'/>`; };
-      return sky + `<rect x='114' y='${cy + 60}' width='252' height='70' fill='${front}' opacity='0.35'/>` + temple(186, 70, 96) + temple(300, 62, 78) + temple(244, 52, 116);
-    }
-    if (kind === "walls") {
-      const b = cy + 118;
-      let wall = `<path d='M120 ${b} L120 ${cy + 58} L360 ${cy + 58} L360 ${b} Z' fill='${back}'/>`;
-      for (let x = 128; x < 360; x += 26) wall += `<rect x='${x}' y='${cy + 48}' width='14' height='14' fill='${back}'/>`;
-      wall += `<path d='M232 ${cy + 58} Q244 ${cy + 6} 256 ${cy + 58} Z' fill='${P.accent}'/><rect x='250' y='${cy + 20}' width='4' height='40' fill='${P.accent}'/>`;
-      wall += `<rect x='120' y='${cy + 78}' width='240' height='40' fill='${front}' opacity='0.9'/>`;
-      return sky + wall;
-    }
-    const pts = ridges[kind] || ridges.range;
-    const build = arr => "M114 428 L" + arr.map(a => a.join(" ")).join(" L") + " L366 428 Z";
-    const frontArr = pts.map(a => [a[0], Math.min(a[1] + 34, 406)]);
-    let snowEls = "";
-    const peaks = pts.slice().sort((a, b) => a[1] - b[1]).slice(0, 3);
-    peaks.forEach(pk => { snowEls += `<path d='M${pk[0] - 13} ${pk[1] + 17} L${pk[0]} ${pk[1]} L${pk[0] + 13} ${pk[1] + 17} L${pk[0] + 5} ${pk[1] + 13} L${pk[0]} ${pk[1] + 17} L${pk[0] - 5} ${pk[1] + 13} Z' fill='${snow}'/>`; });
-    const farArr = pts.map(a => [a[0], a[1] - 12]);
-    const horizon = `<rect x='114' y='${cy + 30}' width='252' height='42' fill='#ffffff' opacity='0.08'/>`;
-    return sky + horizon + `<path d='${build(farArr)}' fill='${far}' opacity='0.85'/>` + `<path d='${build(pts)}' fill='${back}'/>` + snowEls + `<path d='${build(frontArr)}' fill='${front}'/>`;
+    return M[key] || M.steel;
   }
 
-  watchArt(p, shot, strapKey) {
-    shot = shot || "front";
-    if (!this._artv3) this._artv3 = {};
-    const key = p.slug + "-" + shot + "-" + (strapKey || "");
-    if (this._artv3[key]) return this._artv3[key];
-    const P = this.wpal(p), cx = 240, cy = 300;
-    let svg;
-    if (shot === "caseback") {
-      let mount = `<path d='M200 ${cy + 6} L240 ${cy - 42} L268 ${cy - 6} L300 ${cy - 30} L340 ${cy + 6} Z' fill='${P.caseDk}' opacity='0.9'/>`;
-      let screws = [0, 90, 180, 270].map(a => { const [x, y] = this._pt(cx, cy, 118, a); return `<circle cx='${x}' cy='${y}' r='5' fill='#6b6f73'/><circle cx='${x}' cy='${y}' r='2.4' fill='#3a3d40'/>`; }).join("");
-      svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 600'><defs><radialGradient id='bg' cx='38%' cy='30%' r='80%'><stop offset='0%' stop-color='#23201b'/><stop offset='100%' stop-color='#14110d'/></radialGradient><radialGradient id='ring' cx='36%' cy='30%' r='75%'><stop offset='0%' stop-color='${P.caseLt}'/><stop offset='100%' stop-color='${P.caseDk}'/></radialGradient><radialGradient id='disc' cx='40%' cy='34%' r='72%'><stop offset='0%' stop-color='#4a4e52'/><stop offset='100%' stop-color='#232629'/></radialGradient></defs><rect width='480' height='600' fill='url(#bg)'/><ellipse cx='240' cy='470' rx='150' ry='22' fill='rgba(0,0,0,.35)'/><circle cx='${cx}' cy='${cy}' r='160' fill='url(#ring)'/><circle cx='${cx}' cy='${cy}' r='134' fill='url(#disc)'/><g fill='none' stroke='#565a5e' stroke-width='0.8' opacity='0.5'><circle cx='${cx}' cy='${cy}' r='120'/><circle cx='${cx}' cy='${cy}' r='104'/><circle cx='${cx}' cy='${cy}' r='150'/></g>${screws}${mount}<text x='${cx}' y='${cy - 66}' font-family='Georgia,serif' font-size='19' letter-spacing='5' fill='#d9d2c2' text-anchor='middle'>NEPAL</text><text x='${cx}' y='${cy + 44}' font-family='Georgia,serif' font-size='14' fill='#cdb98f' text-anchor='middle'>${p.engraving}</text><text x='${cx}' y='${cy + 68}' font-family='Arial,sans-serif' font-size='11' letter-spacing='2' fill='#9aa0a4' text-anchor='middle'>${p.region.toUpperCase()}</text><text x='${cx}' y='${cy + 92}' font-family='Arial,sans-serif' font-size='11' letter-spacing='2' fill='#9aa0a4' text-anchor='middle'>${p.wr} · No. 0147 / 500</text></svg>`;
-      this._artv3[key] = "data:image/svg+xml," + encodeURIComponent(svg);
-      return this._artv3[key];
-    }
-    // markers
-    let marks = "";
-    for (let i = 0; i < 12; i++) {
-      const a = i * 30, [ox, oy] = this._pt(cx, cy, 116, a), [ix, iy] = this._pt(cx, cy, 100, a);
-      if (P.marker === "arabic" && i % 3 === 0) { const [tx, ty] = this._pt(cx, cy, 100, a); const n = i === 0 ? "12" : i === 3 ? "3" : i === 6 ? "6" : "9"; marks += `<text x='${tx}' y='${(+ty + 8)}' font-family='Georgia,serif' font-size='27' fill='${P.txt}' text-anchor='middle'>${n}</text>`; }
-      else if (P.marker === "arabic") { marks += `<line x1='${ox}' y1='${oy}' x2='${ix}' y2='${iy}' stroke='${P.txt}' stroke-width='2' stroke-linecap='round'/>`; }
-      else if (P.marker === "dots") { const [dx, dy] = this._pt(cx, cy, 108, a); marks += `<circle cx='${dx}' cy='${dy}' r='4.2' fill='${P.txt}'/>`; }
-      else if (P.marker === "fiveDots") { const [dx, dy] = this._pt(cx, cy, 108, a); const big = i % 3 === 0; marks += `<circle cx='${dx}' cy='${dy}' r='${big ? 6 : 3.4}' fill='${big ? P.accent : P.txt}'/>`; }
-      else if (P.marker === "temple") { const [bx, by] = this._pt(cx, cy, 112, a), [px, py] = this._pt(cx, cy, 98, a); marks += `<path d='M${bx} ${by} L${(+px + 0)} ${py} Z' stroke='${P.txt}' stroke-width='6' stroke-linecap='round'/><circle cx='${px}' cy='${py}' r='2.6' fill='${P.accent}'/>`; }
-      else { const wide = P.marker === "stick" ? 3.4 : 6.5, core = P.marker === "stick" ? 2.2 : 4.6; marks += `<line x1='${ox}' y1='${oy}' x2='${ix}' y2='${iy}' stroke='rgba(0,0,0,.4)' stroke-width='${wide}' stroke-linecap='round'/><line x1='${ox}' y1='${oy}' x2='${ix}' y2='${iy}' stroke='${P.txt}' stroke-width='${core}' stroke-linecap='round'/>`; }
-    }
-    const [hx, hy] = this._pt(cx, cy, 64, 305), [mx, my] = this._pt(cx, cy, 98, 63), [s1x, s1y] = this._pt(cx, cy, 106, 200), [s2x, s2y] = this._pt(cx, cy, -22, 200);
-    const date = P.hasDate ? `<rect x='${cx + 60}' y='${cy - 15}' width='30' height='30' rx='2' fill='${P.light ? "#f4f1ea" : "#e9e5db"}'/><text x='${cx + 75}' y='${cy + 6}' font-family='Arial' font-size='16' fill='#222' text-anchor='middle'>18</text>` : "";
-    const sig = this.sigSVG(P.sig, cx, cy, P.txt);
-    const strapType = strapKey ? ({ leather: "Leather", canvas: "Canvas", steel: "Metal" }[strapKey] || p.strapType) : p.strapType;
-    const strapHex = strapType === p.strapType ? P.strapHex : (strapType === "Metal" ? "#8f9398" : strapType === "Canvas" ? "#5d5c3a" : "#5c3d24");
-    const straps = shot === "dial" ? "" : this.strapSVG(strapType, strapHex);
-    const zoom = shot === "dial" ? `transform='translate(${cx},${cy}) scale(1.4) translate(${-cx},${-cy})'` : "";
-    let ticks = "";
-    for (let i = 0; i < 60; i++) { if (i % 5 === 0) continue; const [ax, ay] = this._pt(cx, cy, 124, i * 6), [bx, by] = this._pt(cx, cy, 119, i * 6); ticks += `<line x1='${ax}' y1='${ay}' x2='${bx}' y2='${by}' stroke='${P.txt}' stroke-width='1' opacity='0.4'/>`; }
-    const dialUrl = P.scenic ? "url(#sky)" : "url(#dial)";
-    let sceneEl, markLayer, ticksLayer = ticks, chronoSkip = null;
-    if (P.style === "chrono") {
-      chronoSkip = [3, 6, 9];
-      sceneEl = this.subdialSVG(cx - 46, cy, 26, P.dialLt, P.accent, 100) + this.subdialSVG(cx, cy + 46, 26, P.dialLt, P.accent, 260) + this.subdialSVG(cx + 46, cy, 26, P.dialLt, P.accent, 160);
-      markLayer = this.batonMarkers(P, chronoSkip);
-    } else if (P.style === "guilloche") {
-      sceneEl = this.guillocheSVG(P);
-      markLayer = this.batonMarkers(P, [6]);
-    } else if (P.style === "octagon") {
-      sceneEl = this.guillocheSVG(P);
-      markLayer = this.batonMarkers(P, null);
+  // --- material defs ----------------------------------------------------------
+  // brushed  : fine repeating linear pattern + top-left light wash
+  // polished : hard-stop gradient (never a smooth ramp)
+  // ceramic  : flatter than steel, highlight lives only on the chamfer
+  _matDefs(u, spec) {
+    const m = this._metal(spec.metal), f = spec.finish;
+    let d = "";
+
+    // Brushed: repeating 2px linear pattern. The pattern is the *finish* layer;
+    // it sits over the base colour and under the specular wash.
+    if (f !== "ceramic") d += `<pattern id='${u}brush' width='2' height='2' patternUnits='userSpaceOnUse' patternTransform='rotate(-38)'>` +
+         `<rect width='2' height='2' fill='${m.base}'/>` +
+         `<rect width='0.7' height='2' fill='${this._shade(m.base, 0.07)}'/>` +
+         `<rect x='1.4' width='0.4' height='2' fill='${this._shade(m.base, -0.09)}'/></pattern>`;
+
+    // Top-left light wash that rides over the brushing.
+    d += `<linearGradient id='${u}wash' x1='0.08' y1='0' x2='0.92' y2='1'>` +
+         `<stop offset='0%' stop-color='${m.spec}' stop-opacity='0.44'/>` +
+         `<stop offset='34%' stop-color='${m.spec}' stop-opacity='0.10'/>` +
+         `<stop offset='62%' stop-color='#000000' stop-opacity='0.16'/>` +
+         `<stop offset='100%' stop-color='#000000' stop-opacity='0.34'/></linearGradient>`;
+
+    // Polished: hard stops. Each colour holds, then snaps — that snap is what
+    // reads as a mirror finish. A smooth ramp reads as plastic.
+    // One bright band top-left, one specular line, one dark band bottom-right.
+    // Each colour holds flat and then snaps. More bands than this reads as zebra,
+    // not as a mirror.
+    const needPol = f === "polished" || spec.bezelStyle === "slope";
+    const hs = [
+      [0, this._shade(m.base, 0.14)], [17, this._shade(m.lt, 0.04)],
+      [20, m.spec], [25, m.spec],
+      [28, m.base], [48, this._shade(m.base, -0.05)],
+      [52, this._shade(m.dk, 0.20)], [70, m.dk],
+      [74, this._shade(m.base, -0.14)], [100, this._shade(m.base, 0.02)]
+    ].map(([o, c]) => `<stop offset='${o}%' stop-color='${c}'/>`).join("");
+    if (needPol) d += `<linearGradient id='${u}pol' x1='0.12' y1='0' x2='0.88' y2='1'>${hs}</linearGradient>`;
+
+    // Case body / lugs / crown: a soft radial so the flank reads as a turned
+    // solid. The directional treatment belongs on the bezel ring, not here —
+    // running one linear gradient across case and lugs alike stripes them both.
+    d += `<radialGradient id='${u}disc' cx='34%' cy='26%' r='84%'>` +
+         `<stop offset='0%' stop-color='${this._shade(m.lt, 0.06)}'/>` +
+         `<stop offset='42%' stop-color='${m.base}'/>` +
+         `<stop offset='78%' stop-color='${this._shade(m.base, -0.26)}'/>` +
+         `<stop offset='100%' stop-color='${m.dk}'/></radialGradient>`;
+    d += `<linearGradient id='${u}lug' x1='0' y1='0' x2='0.6' y2='1'>` +
+         `<stop offset='0%' stop-color='${this._shade(m.base, 0.22)}'/>` +
+         `<stop offset='46%' stop-color='${m.base}'/>` +
+         `<stop offset='100%' stop-color='${this._shade(m.base, -0.34)}'/></linearGradient>`;
+
+    // Ceramic: flatter, low internal contrast; the chamfer carries the only light.
+    if (f === "ceramic") d += `<linearGradient id='${u}cer' x1='0.15' y1='0' x2='0.85' y2='1'>` +
+         `<stop offset='0%' stop-color='${this._shade(m.base, 0.10)}'/>` +
+         `<stop offset='50%' stop-color='${m.base}'/>` +
+         `<stop offset='100%' stop-color='${this._shade(m.base, -0.18)}'/></linearGradient>`;
+
+    // Case metal used by lugs, crown, index bodies, date frame.
+    const caseFill = `url(#${u}disc)`;                                    // case body, crown
+    const ringFill = f === "polished" ? `url(#${u}pol)` : f === "ceramic" ? `url(#${u}cer)` : `url(#${u}brush)`;
+    const lugFill = `url(#${u}lug)`;
+
+    // Applied-index metal: always a hard-stop gradient along the marker's length —
+    // an applied index is a polished solid, it catches light in bands.
+    const im = this._metal(spec.indexMetal || spec.metal);
+    d += `<linearGradient id='${u}idx' x1='0' y1='0' x2='0.7' y2='1'>` +
+         `<stop offset='0%' stop-color='${im.lt}'/><stop offset='38%' stop-color='${m.lt}'/>` +
+         `<stop offset='38%' stop-color='${m.base}'/><stop offset='70%' stop-color='${m.base}'/>` +
+         `<stop offset='70%' stop-color='${m.spec}'/><stop offset='100%' stop-color='${m.dk}'/></linearGradient>`;
+
+    return { defs: d, m, caseFill, ringFill, lugFill };
+  }
+
+  // --- dial defs --------------------------------------------------------------
+  _dialDefs(u, spec, R, detail) {
+    const D = spec.dial;
+    let d = "";
+    if (D.type === "lacquer") {
+      // Deep radial, near-black at the rim. The colour survives only in the centre.
+      d += `<radialGradient id='${u}dial' cx='40%' cy='34%' r='78%'>` +
+           `<stop offset='0%' stop-color='${this._shade(D.base, 0.30)}'/>` +
+           `<stop offset='34%' stop-color='${D.base}'/>` +
+           `<stop offset='72%' stop-color='${this._shade(D.base, -0.55)}'/>` +
+           `<stop offset='100%' stop-color='${this._shade(D.base, -0.86)}'/></radialGradient>`;
+    } else if (D.type === "grained" || D.type === "matte") {
+      d += `<radialGradient id='${u}dial' cx='40%' cy='32%' r='80%'>` +
+           `<stop offset='0%' stop-color='${this._shade(D.base, 0.16)}'/>` +
+           `<stop offset='60%' stop-color='${D.base}'/>` +
+           `<stop offset='100%' stop-color='${this._shade(D.base, -0.30)}'/></radialGradient>`;
+      if (detail >= 3) d += `<filter id='${u}grain' x='0' y='0' width='100%' height='100%'>` +
+           `<feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7'/>` +
+           `<feColorMatrix type='saturate' values='0'/></filter>`;
     } else {
-      sceneEl = this.mountainScene(P.scene, P);
-      markLayer = marks;
+      // Sunburst base sits under the wedges; the wedges do the real work.
+      d += `<radialGradient id='${u}dial' cx='42%' cy='36%' r='76%'>` +
+           `<stop offset='0%' stop-color='${this._shade(D.base, 0.12)}'/>` +
+           `<stop offset='100%' stop-color='${this._shade(D.base, -0.24)}'/></radialGradient>`;
     }
-    const bezelLayer = this.bezelSVG(P.bezel, P);
-    let octaEl = "";
-    if (P.bezel === "octagon") {
-      const oc = []; for (let i = 0; i < 8; i++) { const [x, y] = this._pt(cx, cy, 158, i * 45 + 22.5); oc.push(x + " " + y); }
-      octaEl = `<path d='M${oc.join(" L")} Z' fill='none' stroke='${P.caseLt}' stroke-width='6'/>`;
-      for (let i = 0; i < 8; i++) { const [x, y] = this._pt(cx, cy, 140, i * 45 + 22.5); octaEl += `<circle cx='${x}' cy='${y}' r='4' fill='none' stroke='${P.caseDk}' stroke-width='1.6'/><line x1='${(+x - 2.6).toFixed(1)}' y1='${y}' x2='${(+x + 2.6).toFixed(1)}' y2='${y}' stroke='${P.caseDk}' stroke-width='1'/>`; }
+
+    // Axis brightening — the single thing that makes a sunburst read as expensive.
+    const ax = (D.axis || 118);
+    const arad = ax * Math.PI / 180;
+    d += `<linearGradient id='${u}axis' x1='${(0.5 - Math.cos(arad) * 0.5).toFixed(3)}' y1='${(0.5 - Math.sin(arad) * 0.5).toFixed(3)}' x2='${(0.5 + Math.cos(arad) * 0.5).toFixed(3)}' y2='${(0.5 + Math.sin(arad) * 0.5).toFixed(3)}'>` +
+         `<stop offset='0%' stop-color='#ffffff' stop-opacity='${(D.lift || 0.16)}'/>` +
+         `<stop offset='34%' stop-color='#ffffff' stop-opacity='0'/>` +
+         `<stop offset='66%' stop-color='#ffffff' stop-opacity='0'/>` +
+         `<stop offset='100%' stop-color='#ffffff' stop-opacity='${(D.lift || 0.16) * 0.72}'/></linearGradient>`;
+    const brad = (ax + 90) * Math.PI / 180;
+    d += `<linearGradient id='${u}cross' x1='${(0.5 - Math.cos(brad) * 0.5).toFixed(3)}' y1='${(0.5 - Math.sin(brad) * 0.5).toFixed(3)}' x2='${(0.5 + Math.cos(brad) * 0.5).toFixed(3)}' y2='${(0.5 + Math.sin(brad) * 0.5).toFixed(3)}'>` +
+         `<stop offset='0%' stop-color='#000000' stop-opacity='0.30'/>` +
+         `<stop offset='38%' stop-color='#000000' stop-opacity='0'/>` +
+         `<stop offset='62%' stop-color='#000000' stop-opacity='0'/>` +
+         `<stop offset='100%' stop-color='#000000' stop-opacity='0.30'/></linearGradient>`;
+
+    // Angled chapter ring — a slope, so it takes light differently to the dial face.
+    d += `<linearGradient id='${u}chap' x1='0.12' y1='0' x2='0.88' y2='1'>` +
+         `<stop offset='0%' stop-color='${this._shade(D.base, 0.34)}'/>` +
+         `<stop offset='48%' stop-color='${this._shade(D.base, -0.10)}'/>` +
+         `<stop offset='100%' stop-color='${this._shade(D.base, -0.46)}'/></linearGradient>`;
+
+    // Sapphire: one diagonal glare band + a faint blue-violet AR cast.
+    if (detail >= 2) d += `<linearGradient id='${u}glare' x1='0' y1='0' x2='1' y2='1'>` +
+         `<stop offset='0%' stop-color='#ffffff' stop-opacity='0'/>` +
+         `<stop offset='40%' stop-color='#ffffff' stop-opacity='0'/>` +
+         `<stop offset='47%' stop-color='#ffffff' stop-opacity='0.13'/>` +
+         `<stop offset='53%' stop-color='#ffffff' stop-opacity='0.13'/>` +
+         `<stop offset='60%' stop-color='#ffffff' stop-opacity='0'/>` +
+         `<stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient>`;
+    if (detail >= 2) d += `<radialGradient id='${u}ar' cx='64%' cy='72%' r='60%'>` +
+         `<stop offset='0%' stop-color='#6a5acd' stop-opacity='0.10'/>` +
+         `<stop offset='100%' stop-color='#6a5acd' stop-opacity='0'/></radialGradient>`;
+
+    // Lume: recessed warm-cream inlay. Slightly green-cream, never white.
+    d += `<linearGradient id='${u}lume' x1='0.2' y1='0' x2='0.8' y2='1'>` +
+         `<stop offset='0%' stop-color='${this._shade(spec.lume, 0.22)}'/>` +
+         `<stop offset='100%' stop-color='${this._shade(spec.lume, -0.26)}'/></linearGradient>`;
+
+    d += `<radialGradient id='${u}hub' cx='50%' cy='50%' r='50%'>` +
+         `<stop offset='0%' stop-color='${D.base}' stop-opacity='1'/>` +
+         `<stop offset='55%' stop-color='${D.base}' stop-opacity='0.85'/>` +
+         `<stop offset='100%' stop-color='${D.base}' stop-opacity='0'/></radialGradient>`;
+    d += `<clipPath id='${u}sigR' clipPathUnits='userSpaceOnUse'><rect x='52' y='-10' width='60' height='70'/></clipPath>`;
+    d += `<clipPath id='${u}dclip'><circle cx='240' cy='300' r='${R.dial}'/></clipPath>`;
+    return d;
+  }
+
+  // --- sunburst wedges --------------------------------------------------------
+  // 144 narrow alternating stops at full detail. Grouped into three fills so the
+  // whole burst costs three <path> elements, not 144.
+  _sunburst(u, spec, R, n) {
+    if (spec.dial.type !== "sunburst") return "";
+    const cx = 240, cy = 300, r = R.dial, g = [[], [], []];
+    for (let i = 0; i < n; i++) {
+      const a0 = i * 360 / n, a1 = (i + 1) * 360 / n;
+      const [x0, y0] = this._pt(cx, cy, r, a0), [x1, y1] = this._pt(cx, cy, r, a1);
+      g[i % 3].push(`M${cx} ${cy}L${x0} ${y0}A${r} ${r} 0 0 1 ${x1} ${y1}Z`);
     }
-    svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 600'><defs><radialGradient id='bg' cx='36%' cy='26%' r='85%'><stop offset='0%' stop-color='#2a2620'/><stop offset='100%' stop-color='#141109'/></radialGradient><linearGradient id='ring' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='${P.caseLt}'/><stop offset='45%' stop-color='${P.caseDk}'/><stop offset='100%' stop-color='${P.caseLt}'/></linearGradient><radialGradient id='dial' cx='40%' cy='34%' r='75%'><stop offset='0%' stop-color='${P.dialLt}'/><stop offset='100%' stop-color='${P.dialDk}'/></radialGradient><linearGradient id='sky' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='${P.dialDk}'/><stop offset='52%' stop-color='${P.dialLt}'/><stop offset='100%' stop-color='${P.dialDk}'/></linearGradient><clipPath id='dclip'><circle cx='${cx}' cy='${cy}' r='125'/></clipPath><linearGradient id='lnk' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#eef1f3'/><stop offset='48%' stop-color='#b7bcc0'/><stop offset='100%' stop-color='#83878b'/></linearGradient></defs><rect width='480' height='600' fill='url(#bg)'/><ellipse cx='240' cy='474' rx='152' ry='22' fill='rgba(0,0,0,.4)'/>${straps}<g ${zoom}><circle cx='${cx}' cy='${cy}' r='160' fill='url(#ring)'/>${bezelLayer}${octaEl}<circle cx='${cx}' cy='${cy}' r='138' fill='${P.caseDk}'/><circle cx='${cx}' cy='${cy}' r='127' fill='${dialUrl}'/><g clip-path='url(#dclip)'>${sceneEl}</g><circle cx='${cx}' cy='${cy}' r='125' fill='none' stroke='rgba(0,0,0,.35)' stroke-width='3' opacity='0.4'/>${ticksLayer}${markLayer}${date}<text x='${cx}' y='${cy - 46}' font-family='Georgia,serif' font-size='17' letter-spacing='5' fill='${P.txt}' text-anchor='middle'>NEPAL</text><text x='${cx}' y='${cy + 74}' font-family='Arial,sans-serif' font-size='8.5' letter-spacing='3' fill='${P.txt}' text-anchor='middle' opacity='.85'>${p.collection.toUpperCase()}</text><line x1='${cx}' y1='${cy}' x2='${hx}' y2='${hy}' stroke='${P.hand}' stroke-width='7' stroke-linecap='round'/><line x1='${cx}' y1='${cy}' x2='${mx}' y2='${my}' stroke='${P.hand}' stroke-width='4.5' stroke-linecap='round'/><line x1='${cx}' y1='${cy}' x2='${hx}' y2='${hy}' stroke='rgba(255,255,255,.4)' stroke-width='1.6' stroke-linecap='round'/><line x1='${cx}' y1='${cy}' x2='${mx}' y2='${my}' stroke='rgba(255,255,255,.4)' stroke-width='1.1' stroke-linecap='round'/><line x1='${s2x}' y1='${s2y}' x2='${s1x}' y2='${s1y}' stroke='${P.accent}' stroke-width='2' stroke-linecap='round'/><circle cx='${cx}' cy='${cy}' r='6.5' fill='${P.caseDk}'/><circle cx='${cx}' cy='${cy}' r='2.6' fill='${P.accent}'/><rect x='398' y='${cy - 12}' width='16' height='24' rx='3' fill='url(#ring)'/></g></svg>`;
-    this._artv3[key] = "data:image/svg+xml," + encodeURIComponent(svg);
-    return this._artv3[key];
+    const b = spec.dial.base;
+    const rgb = this._hx(b), lum = (rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114) / 255;
+    // Pale dials can carry a wider step before it shows; saturated ones cannot.
+    const k = 0.030 + lum * 0.045;
+    const cols = [this._shade(b, k), b, this._shade(b, -k * 1.1)];
+    // The rays converge at the pivot; left visible that convergence reads as a
+    // paper fan. A soft disc of the base colour buries it, exactly as the
+    // handstack does on a real dial.
+    return g.map((paths, i) => `<path d='${paths.join("")}' fill='${cols[i]}'/>`).join("") +
+      `<circle cx='${cx}' cy='${cy}' r='${(r * 0.30).toFixed(1)}' fill='url(#${u}hub)'/>`;
+  }
+
+  // --- geometry ---------------------------------------------------------------
+  // All radii in viewBox units. caseMm drives the scale; every other dimension is
+  // a ratio of the case diameter so the proportions hold at any size.
+  //   bezel      8–11% of case diameter
+  //   dial open  78–82% of case diameter
+  //   hour hand  to the inner index edge
+  //   minute     to the minute track
+  //   seconds    overshoots to the chapter ring
+  //   crown      ~12% of case diameter
+  watchGeom(spec) {
+    const D = 320 * (spec.caseMm / 40);        // case diameter in viewBox units
+    const Rc = D / 2;
+    const bez = D * (spec.bezelPct || 0.095);  // 9.5% of case diameter
+    const dial = D * (spec.dialPct || 0.80) / 2;
+    return {
+      D, caseOuter: Rc,
+      bezelInner: Rc - bez,
+      dial,
+      chapOuter: dial,
+      chapInner: dial - D * 0.031,             // angled ring
+      track: dial - D * 0.024,                 // minute track sits on the slope
+      idxOuter: dial - D * 0.042,
+      idxInner: dial - D * 0.128,              // inner index edge — hour-hand length
+      hourLen: dial - D * 0.128,
+      minLen: dial - D * 0.024,
+      secLen: dial - D * 0.006,                // overshoot onto the chapter ring
+      secTail: D * 0.088,
+      crownD: D * 0.12,
+      lugHalf: (spec.l2lMm / spec.caseMm) * Rc // lug-to-lug, kept under 49 mm
+    };
+  }
+
+  // --- applied indices --------------------------------------------------------
+  // Two shapes: a bright top face and an offset dark shadow. Light is top-left,
+  // so the shadow falls to the lower-right. A flat rectangle is the tell of a
+  // fake — a real applied index is a solid with a visible side wall.
+  _baton(cx, cy, a, r0, r1, w, s0, s1) {
+    const rad = (a - 90) * Math.PI / 180, ux = Math.cos(rad), uy = Math.sin(rad), px = -uy, py = ux;
+    if (s0 == null) { s0 = -0.5; s1 = 0.5; }
+    const p = (r, s) => [(cx + ux * r + px * w * s).toFixed(2), (cy + uy * r + py * w * s).toFixed(1)].join(",");
+    return [p(r1, s1), p(r1, s0), p(r0, s0), p(r0, s1)].join(" ");
+  }
+  _shift(pts, dx, dy) {
+    return pts.split(" ").map(q => { const [x, y] = q.split(","); return (+x + dx).toFixed(1) + "," + (+y + dy).toFixed(1); }).join(" ");
+  }
+
+  _indices(u, spec, R, detail, lumeOnly) {
+    const cx = 240, cy = 300, I = spec.index, S = spec.signature, m = this._metal(spec.indexMetal || spec.metal);
+    let out = "";
+    const wideW = R.D * 0.026, narrowW = R.D * 0.019;
+
+    for (let i = 0; i < 12; i++) {
+      const a = i * 30;
+      if (spec.complication === "chrono" && [3, 6, 9].indexOf(i) >= 0) continue;
+      if (spec.date && spec.date.pos === i) continue;   // the date owns that slot
+
+      // The 12 marker is the signature element on some models — drawn separately.
+      if (i === 0 && S.element === "12") { if (!lumeOnly) out += this._summitMarker(u, spec, R, detail); continue; }
+
+      if (lumeOnly && !I.lume) continue;
+      if (I.type === "printed-arabic" && i % 3 === 0) {
+        if (lumeOnly) { const [lx, ly] = this._pt(cx, cy, R.idxInner + R.D * 0.012, a); out += `<circle cx='${lx}' cy='${ly}' r='${R.D * 0.018}' fill='${spec.lume}'/>`; continue; }
+        const [tx, ty] = this._pt(cx, cy, R.idxInner + R.D * 0.030, a);
+        const n = i === 0 ? "12" : String(i === 3 ? 3 : i === 6 ? 6 : 9);
+        out += `<text x='${tx}' y='${+ty + R.D * 0.030}' font-family='Jost,Futura,Avenir,sans-serif' font-weight='500' font-size='${(R.D * 0.090).toFixed(1)}' letter-spacing='0.5' fill='${spec.dialText}' text-anchor='middle'>${n}</text>`;
+        continue;
+      }
+
+      const isQuarter = i % 3 === 0;
+      const w = isQuarter ? wideW : narrowW;
+      const r0 = R.idxInner, r1 = R.idxOuter;
+
+      if (I.type === "applied-round") {
+        const [dx, dy] = this._pt(cx, cy, (r0 + r1) / 2, a);
+        if (lumeOnly) { out += `<circle cx='${dx}' cy='${dy}' r='${(isQuarter ? R.D * 0.026 : R.D * 0.018) * 0.52}' fill='${spec.lume}'/>`; continue; }
+        const rr = (isQuarter ? R.D * 0.031 : R.D * 0.021);
+        out += `<circle cx='${+dx + 0.9}' cy='${+dy + 1.1}' r='${rr + 0.8}' fill='${this._shade(m.dk, -0.25)}'/>`;
+        out += `<circle cx='${dx}' cy='${dy}' r='${rr}' fill='url(#${u}idx)'/>`;
+        if (detail >= 2) out += `<path d='M${+dx - rr * 0.72} ${+dy - rr * 0.30} A${rr} ${rr} 0 0 1 ${+dx + rr * 0.30} ${+dy - rr * 0.72}' fill='none' stroke='${m.spec}' stroke-width='${rr * 0.34}' opacity='0.7'/>`;
+        if (I.lume && detail >= 2) out += `<circle cx='${dx}' cy='${dy}' r='${rr * 0.52}' fill='url(#${u}lume)'/>`;
+        continue;
+      }
+
+      if (I.type === "applied-arrow" && isQuarter && !lumeOnly) {
+        const rad = (a - 90) * Math.PI / 180, ux = Math.cos(rad), uy = Math.sin(rad), px = -uy, py = ux;
+        const tip = [cx + ux * r1, cy + uy * r1];
+        const bl = [cx + ux * r0 + px * w * 0.62, cy + uy * r0 + py * w * 0.62];
+        const br = [cx + ux * r0 - px * w * 0.62, cy + uy * r0 - py * w * 0.62];
+        const pts = [tip, bl, br].map(q => q.map(v => v.toFixed(1)).join(",")).join(" ");
+        out += `<polygon points='${this._shift(pts, 1.5, 1.9)}' fill='rgba(0,0,0,0.44)'/>`;
+        out += `<polygon points='${pts}' fill='url(#${u}idx)'/>`;
+        if (I.lume) {
+          const t2 = [cx + ux * (r1 - R.D * 0.020), cy + uy * (r1 - R.D * 0.020)];
+          const l2 = [cx + ux * (r0 + R.D * 0.016) + px * w * 0.28, cy + uy * (r0 + R.D * 0.016) + py * w * 0.28];
+          const r2 = [cx + ux * (r0 + R.D * 0.016) - px * w * 0.28, cy + uy * (r0 + R.D * 0.016) - py * w * 0.28];
+          out += `<polygon points='${[t2, l2, r2].map(q => q.map(v => v.toFixed(1)).join(",")).join(" ")}' fill='url(#${u}lume)'/>`;
+        }
+        continue;
+      }
+
+      // Applied baton, built as a bevelled solid:
+      //   1. the side wall the index stands on, sat just under and to the right
+      //   2. the top face, split down its own ridge — bright half, dark half
+      //   3. a recessed lume inlay, inset from the index edge on all four sides
+      // A single flat rectangle, or a face with a drop shadow behind it, is the
+      // giveaway: real applied markers show a wall and a ridge.
+      if (lumeOnly) { const ri3 = R.D * 0.016; out += `<polygon points='${this._baton(cx, cy, a, r0 + ri3, r1 - ri3, w * 0.40)}' fill='${spec.lume}'/>`; continue; }
+      const wall = this._baton(cx, cy, a, r0 - 0.5, r1 + 0.5, w + 1.0);
+      out += `<polygon points='${this._shift(wall, 0.7, 0.9)}' fill='${this._shade(m.dk, 0.04)}'/>`;
+      // Face split down the ridge. The halves sit either side of the base value
+      // so the marker keeps its weight on a white dial as well as a black one.
+      out += `<polygon points='${this._baton(cx, cy, a, r0, r1, w, -0.5, 0)}' fill='${this._shade(m.base, 0.20)}'/>`;
+      out += `<polygon points='${this._baton(cx, cy, a, r0, r1, w, 0, 0.5)}' fill='${this._shade(m.base, -0.40)}'/>`;
+      if (detail >= 2) {
+        out += `<polygon points='${this._baton(cx, cy, a, r0, r1, w, -0.5, -0.30)}' fill='${m.spec}' opacity='0.6'/>`;
+        out += `<polygon points='${this._baton(cx, cy, a, r0, r1, w)}' fill='none' stroke='rgba(0,0,0,0.42)' stroke-width='0.7'/>`;
+      }
+      if (I.lume && detail >= 2) {
+        const ri2 = R.D * 0.016, wi = w * 0.40;
+        out += `<polygon points='${this._baton(cx, cy, a, r0 + ri2, r1 - ri2, wi)}' fill='url(#${u}lume)'/>`;
+        out += `<polygon points='${this._baton(cx, cy, a, r0 + ri2, r1 - ri2, wi)}' fill='none' stroke='rgba(0,0,0,0.30)' stroke-width='0.6'/>`;
+      }
+    }
+    return out;
+  }
+
+  // --- signature: the peak's own summit profile --------------------------------
+  // Each model carries its mountain in exactly one element and never more.
+  // Profiles are drawn to each peak's recognisable silhouette, normalised to a
+  // 100 x 44 box with the summit at its true relative position.
+  summitProfile(key) {
+    const P = {
+      // Everest: long west ridge, summit right of centre, south-east shoulder.
+      everest:      "M0 44 L18 31 L31 33 L44 16 L52 4 L60 15 L70 13 L82 27 L92 24 L100 44 Z",
+      // Kangchenjunga: five-summit massif, main summit second from left.
+      kangchenjunga:"M0 44 L10 26 L18 30 L27 9 L36 22 L45 14 L54 26 L64 18 L74 30 L86 25 L100 44 Z",
+      // Lhotse: steep south face, sharp summit, Lhotse Shar to the east.
+      lhotse:       "M0 44 L14 34 L26 20 L40 5 L50 12 L58 9 L68 24 L80 21 L90 33 L100 44 Z",
+      // Makalu: isolated four-sided pyramid, near-symmetrical.
+      makalu:       "M0 44 L20 38 L38 20 L50 2 L62 20 L80 38 L100 44 Z",
+      // Cho Oyu: broad, flat-topped whaleback — the least steep of the eight.
+      chooyu:       "M0 44 L14 34 L28 24 L42 18 L58 17 L72 21 L86 31 L100 44 Z",
+      // Dhaulagiri: massive white dome with a long north-east spur.
+      dhaulagiri:   "M0 44 L12 33 L24 27 L36 12 L48 6 L58 11 L70 20 L82 26 L100 44 Z",
+      // Manaslu: twin summit pinnacles above a broad plateau.
+      manaslu:      "M0 44 L16 32 L30 26 L42 10 L48 18 L55 6 L66 21 L80 28 L100 44 Z",
+      // Annapurna I: long serrated ridge wall rather than a single peak.
+      annapurna:    "M0 44 L12 28 L22 33 L32 19 L42 25 L52 11 L62 22 L72 17 L84 29 L100 44 Z",
+      // Machapuchare: the fishtail — twin points, still unclimbed.
+      machapuchare: "M0 44 L20 34 L34 20 L44 6 L50 16 L56 4 L68 19 L82 33 L100 44 Z",
+      // Ama Dablam: the mother's arms, hanging glacier below the summit.
+      amadablam:    "M0 44 L16 36 L28 28 L40 12 L50 3 L60 14 L68 27 L84 35 L100 44 Z"
+    };
+    return P[key] || P.everest;
+  }
+
+  // The 12 marker, replaced by the summit profile. Same two-shape treatment as
+  // every other applied index so it reads as metal, not as an icon.
+  _summitMarker(u, spec, R, detail) {
+    const cx = 240, cy = 300;
+    const w = R.D * 0.150, h = w * 0.46;
+    const y = cy - R.idxOuter - h * 0.10;
+    const sx = w / 100, sy = h / 44;
+    const path = this.summitProfile(spec.signature.peak);
+    const m = this._metal(spec.indexMetal || spec.metal);
+    const g = (dx, dy, fill, extra) =>
+      `<g transform='translate(${(cx - w / 2 + dx).toFixed(2)},${(y + dy).toFixed(2)}) scale(${sx.toFixed(4)},${sy.toFixed(4)})'>` +
+      `<path d='${path}' fill='${fill}' ${extra || ""}/></g>`;
+    // Same bevel logic as the other indices: a wall, a face, a specular edge.
+    if (detail < 2) return g(1.0, 1.3, this._shade(m.dk, -0.25)) + g(0, 0, m.base);
+    return g(1.0, 1.3, this._shade(m.dk, -0.25)) +
+      g(0, 0, m.lt) +
+      `<g transform='translate(${(cx - w / 2).toFixed(2)},${y.toFixed(2)}) scale(${sx.toFixed(4)},${sy.toFixed(4)})' clip-path='none'>` +
+      `<path d='${path}' fill='${this._shade(m.base, -0.26)}' clip-path='url(#${u}sigR)'/></g>` +
+      `<g transform='translate(${(cx - w / 2).toFixed(2)},${y.toFixed(2)}) scale(${sx.toFixed(4)},${sy.toFixed(4)})'>` +
+      `<path d='${path}' fill='none' stroke='${this._alpha(m.spec, 0.8)}' stroke-width='1.4' vector-effect='non-scaling-stroke'/></g>`;
+  }
+
+  // --- minute track -----------------------------------------------------------
+  // 60 marks with 1 / 5 / 15 weighting. The 15s are the heaviest; without that
+  // hierarchy a track reads as a printed circle of identical dashes.
+  _track(spec, R, detail) {
+    const cx = 240, cy = 300, col = spec.dialText;
+    let s = "";
+    // Below the grid size the 1-minute marks are sub-pixel; drawing them costs
+    // bytes on every card and shows nothing.
+    const step = detail >= 2 ? 1 : 5;
+    for (let i = 0; i < 60; i += step) {
+      const a = i * 6, q = i % 15 === 0, f = i % 5 === 0;
+      const len = q ? R.D * 0.034 : f ? R.D * 0.026 : R.D * 0.015;
+      const w = q ? 2.2 : f ? 1.7 : 1.0;
+      const [ax, ay] = this._pt(cx, cy, R.track, a), [bx, by] = this._pt(cx, cy, R.track - len, a);
+      s += `<line x1='${ax}' y1='${ay}' x2='${bx}' y2='${by}' stroke='${col}' stroke-width='${w}' opacity='${q ? 1 : f ? 0.9 : 0.68}'/>`;
+    }
+    return s;
+  }
+
+  // --- faceted hands ----------------------------------------------------------
+  // Every hand is split along its ridge into a light half and a dark half. That
+  // crease is the whole difference between a hand and a stick. Each is drawn
+  // pointing at 12 and rotated into place by the caller.
+  _hand(spec, R, kind, angle, uid, lumeOnly) {
+    const cx = 240, cy = 300, H = spec.hands;
+    const len = kind === "h" ? R.hourLen : kind === "m" ? R.minLen : R.secLen;
+    const w = kind === "h" ? R.D * 0.048 : kind === "m" ? R.D * 0.034 : R.D * 0.012;
+    const tail = kind === "h" ? R.D * 0.026 : R.D * 0.030;
+    const lt = this._shade(H.color, 0.34), dk = this._shade(H.color, -0.46);
+    const half = w / 2, tipY = cy - len, baseY = cy + tail;
+    let body = "";
+
+    if (lumeOnly) {
+      if (kind === "s" || !H.lume) return { body: "", angle };
+      const li = w * 0.20, lTop = tipY + len * (H.style === "syringe" ? 0.10 : 0.34), lBot = H.style === "syringe" ? tipY + len * 0.30 : cy - len * 0.06;
+      return { body: `<rect x='${cx - li}' y='${lTop}' width='${li * 2}' height='${Math.max(4, lBot - lTop)}' rx='${li * 0.6}' fill='${H.lumeGlow || spec.lume}'/>`, angle };
+    }
+    if (kind === "s") {
+      // Seconds: a thin blade running through the pivot to a counterweight.
+      body =
+        `<rect x='${cx - half}' y='${cy - len}' width='${w}' height='${len + R.secTail}' fill='${H.secondColor}'/>` +
+        `<rect x='${cx - half}' y='${cy - len}' width='${half * 0.9}' height='${len + R.secTail}' fill='${this._shade(H.secondColor, 0.38)}'/>`;
+      if (spec.signature.element === "counterweight") {
+        // The peak's own summit profile, cut as the counterweight.
+        const cw = R.D * 0.066, ch = cw * 0.46, ty = cy + R.secTail - ch * 1.5;
+        body += `<g transform='translate(${(cx - cw / 2).toFixed(2)},${ty.toFixed(2)}) scale(${(cw / 100).toFixed(4)},${(ch / 44).toFixed(4)})'>` +
+                `<path d='${this.summitProfile(spec.signature.peak)}' fill='${H.secondColor}'/></g>`;
+      } else {
+        const r = R.D * 0.014;
+        body += `<ellipse cx='${cx}' cy='${cy + R.secTail - r * 1.6}' rx='${r}' ry='${r * 1.3}' fill='${H.secondColor}'/>`;
+      }
+      return { body, angle };
+    }
+
+    if (H.style === "dauphine") {
+      // Faceted lozenge: widest a third of the way up, tapering to a point.
+      const shoulder = tipY + len * 0.30;
+      body =
+        `<polygon points='${cx},${tipY} ${cx - half},${shoulder} ${cx - half * 0.30},${baseY} ${cx},${baseY}' fill='${lt}'/>` +
+        `<polygon points='${cx},${tipY} ${cx + half},${shoulder} ${cx + half * 0.30},${baseY} ${cx},${baseY}' fill='${dk}'/>`;
+    } else if (H.style === "sword") {
+      const nose = tipY + len * 0.10;
+      body =
+        `<polygon points='${cx},${tipY} ${cx - half},${nose} ${cx - half},${baseY} ${cx},${baseY}' fill='${lt}'/>` +
+        `<polygon points='${cx},${tipY} ${cx + half},${nose} ${cx + half},${baseY} ${cx},${baseY}' fill='${dk}'/>`;
+    } else {
+      // Syringe: a slim stem carrying a lume-filled barrel below the tip.
+      const stem = half * 0.34, bTop = tipY + len * 0.10, bBot = tipY + len * 0.30, bw = half * 0.80;
+      body =
+        `<polygon points='${cx},${tipY} ${cx - stem},${bTop} ${cx - stem},${baseY} ${cx},${baseY}' fill='${lt}'/>` +
+        `<polygon points='${cx},${tipY} ${cx + stem},${bTop} ${cx + stem},${baseY} ${cx},${baseY}' fill='${dk}'/>` +
+        `<rect x='${cx - bw}' y='${bTop}' width='${bw * 2}' height='${bBot - bTop}' rx='${bw * 0.32}' fill='${dk}'/>` +
+        `<rect x='${cx - bw}' y='${bTop}' width='${bw}' height='${bBot - bTop}' rx='${bw * 0.32}' fill='${lt}'/>`;
+      if (H.lume) body += `<rect x='${cx - bw * 0.56}' y='${bTop + 2}' width='${bw * 1.12}' height='${bBot - bTop - 4}' rx='${bw * 0.24}' fill='url(#${uid}lume)'/>`;
+    }
+
+    // Recessed lume down the blade, inset from the hand's own edge.
+    if (H.lume && H.style !== "syringe") {
+      const li = w * 0.20, lTop = tipY + len * 0.34, lBot = cy - len * 0.06;
+      if (lBot - lTop > 6) body += `<rect x='${cx - li}' y='${lTop}' width='${li * 2}' height='${lBot - lTop}' rx='${li * 0.6}' fill='url(#${uid}lume)'/>`;
+    }
+    // The crease itself, plus an outline so the hand separates from the dial.
+    body += `<line x1='${cx}' y1='${tipY}' x2='${cx}' y2='${baseY}' stroke='rgba(0,0,0,0.28)' stroke-width='0.7'/>`;
+    return { body, angle };
+  }
+
+  // --- bezel ------------------------------------------------------------------
+  // The case body is a soft turned solid; the bezel ring is where the finish
+  // lives, so the directional treatment is stroked onto the annulus alone.
+  _bezel(u, spec, R, mat, detail) {
+    const cx = 240, cy = 300, m = mat.m;
+    const ro = R.caseOuter, ri = R.bezelInner, mid = (ro + ri) / 2, bw = ro - ri;
+    let s = `<circle cx='${cx}' cy='${cy}' r='${ro}' fill='${mat.caseFill}'/>`;
+    s += `<circle cx='${cx}' cy='${cy}' r='${mid}' fill='none' stroke='${mat.ringFill}' stroke-width='${bw}'/>`;
+    if (spec.finish !== "ceramic") s += `<circle cx='${cx}' cy='${cy}' r='${mid}' fill='none' stroke='url(#${u}wash)' stroke-width='${bw}'/>`;
+
+    if (spec.bezelStyle === "coin") {
+      // Coin edge: evenly spaced radial marks on the outer rim only, shallow and
+      // low-contrast. Deep high-contrast teeth read as a gear, not as milling.
+      const n = detail >= 2 ? 150 : 48, depth = R.D * 0.017;
+      for (let i = 0; i < n; i++) {
+        const a = i * 360 / n;
+        const [ox, oy] = this._pt(cx, cy, ro - 1, a), [ix, iy] = this._pt(cx, cy, ro - depth, a);
+        s += `<line x1='${ox}' y1='${oy}' x2='${ix}' y2='${iy}' stroke='${i % 2 ? this._alpha(m.dk, 0.5) : this._alpha(m.spec, 0.26)}' stroke-width='1.3'/>`;
+      }
+    } else if (spec.bezelStyle === "flute") {
+      // Fluting runs the full ring but stays shallow — the flutes are facets,
+      // not petals.
+      const n = detail >= 2 ? 84 : 36;
+      for (let i = 0; i < n; i++) {
+        const a = i * 360 / n;
+        const [ox, oy] = this._pt(cx, cy, ro - 0.5, a), [ix, iy] = this._pt(cx, cy, ri + bw * 0.20, a);
+        s += `<line x1='${ox}' y1='${oy}' x2='${ix}' y2='${iy}' stroke='${i % 2 ? this._alpha(m.dk, 0.42) : this._alpha(m.lt, 0.30)}' stroke-width='${(R.D * 0.011).toFixed(2)}'/>`;
+      }
+    } else if (spec.bezelStyle === "dive") {
+      const ins = spec.bezelInsert || "#16181b";
+      s += `<circle cx='${cx}' cy='${cy}' r='${mid}' fill='none' stroke='${ins}' stroke-width='${bw * 0.86}'/>`;
+      s += `<circle cx='${cx}' cy='${cy}' r='${mid}' fill='none' stroke='url(#${u}wash)' stroke-width='${bw * 0.86}' opacity='0.55'/>`;
+      for (let i = 0; i < 60; i += (detail >= 2 ? 1 : 5)) {
+        const a = i * 6, big = i % 5 === 0;
+        if (i === 0) continue;
+        const [ox, oy] = this._pt(cx, cy, mid + bw * 0.30, a), [ix, iy] = this._pt(cx, cy, mid - bw * (big ? 0.34 : 0.10), a);
+        s += `<line x1='${ox}' y1='${oy}' x2='${ix}' y2='${iy}' stroke='${this._shade(ins, 0.58)}' stroke-width='${big ? 2.4 : 1.1}' opacity='${big ? 0.9 : 0.6}'/>`;
+      }
+      // Lume pip at 12, in its own metal surround.
+      const [px, py] = this._pt(cx, cy, mid, 0);
+      s += `<circle cx='${px}' cy='${py}' r='${R.D * 0.020}' fill='${this._alpha(m.spec, 0.5)}'/>`;
+      s += `<circle cx='${px}' cy='${py}' r='${R.D * 0.015}' fill='url(#${u}lume)'/>`;
+    }
+
+    // Chamfer at the bezel's inner edge. On ceramic this is the only highlight
+    // the material gets.
+    s += `<circle cx='${cx}' cy='${cy}' r='${ri + bw * 0.30}' fill='none' stroke='rgba(0,0,0,0.20)' stroke-width='1'/>`;
+    s += `<circle cx='${cx}' cy='${cy}' r='${ri + bw * 0.26}' fill='none' stroke='${this._alpha(m.spec, 0.22)}' stroke-width='1'/>`;
+    s += `<circle cx='${cx}' cy='${cy}' r='${ri}' fill='none' stroke='${this._alpha(m.spec, spec.finish === "ceramic" ? 0.6 : 0.3)}' stroke-width='1.8'/>`;
+    s += `<circle cx='${cx}' cy='${cy}' r='${ri - 1.4}' fill='none' stroke='rgba(0,0,0,0.4)' stroke-width='1'/>`;
+    s += `<circle cx='${cx}' cy='${cy}' r='${ro}' fill='none' stroke='rgba(0,0,0,0.5)' stroke-width='1.2'/>`;
+    return s;
+  }
+
+  // --- crown, lugs, case flank ------------------------------------------------
+  _crown(u, spec, R, caseFill, detail) {
+    const cx = 240, cy = 300, m = this._metal(spec.metal);
+    const cw = R.crownD * 0.66, ch = R.crownD;
+    const x = cx + R.caseOuter + R.crownD * 0.10, y = cy - ch / 2;
+    let s = `<rect x='${cx + R.caseOuter - 4}' y='${cy - ch * 0.34}' width='${R.crownD * 0.24}' height='${ch * 0.68}' fill='${this._shade(this._metal(spec.metal).base, -0.22)}'/>`;
+    // Crown: fluted flank plus a signed end face.
+    s += `<rect x='${x}' y='${y}' width='${cw}' height='${ch}' rx='2.5' fill='${caseFill}'/>`;
+    for (let i = 1; i < 8; i += (detail >= 2 ? 1 : 2)) {
+      const ly = y + ch * i / 8;
+      s += `<line x1='${x}' y1='${ly}' x2='${x + cw}' y2='${ly}' stroke='${i % 2 ? this._alpha(m.dk, 0.75) : this._alpha(m.spec, 0.30)}' stroke-width='1.4'/>`;
+    }
+    s += `<rect x='${x + cw}' y='${y + ch * 0.14}' width='${cw * 0.44}' height='${ch * 0.72}' rx='2' fill='${this._shade(m.base, -0.10)}'/>`;
+    // Signed crown: the brand's peak mark, small enough to read as engraving.
+    const gx = x + cw + cw * 0.22, gy = y + ch * 0.5, gw = cw * 0.30;
+    s += `<path d='M${gx - gw} ${gy + gw * 0.62} L${gx - gw * 0.18} ${gy - gw * 0.55} L${gx + gw * 0.30} ${gy + gw * 0.10} L${gx + gw} ${gy + gw * 0.62} Z' fill='${this._alpha(m.spec, 0.6)}'/>`;
+    s += `<rect x='${x}' y='${y}' width='${cw}' height='${ch}' rx='2.5' fill='none' stroke='rgba(0,0,0,0.4)' stroke-width='0.8'/>`;
+    return s;
+  }
+
+  _lugs(u, spec, R, lugFill, detail) {
+    const cx = 240, cy = 300, m = this._metal(spec.metal);
+    const R0 = R.caseOuter, L = R.lugHalf;
+    // Four horns. Each tapers from the case flank to a rounded tip, and the
+    // strap passes between the pair — a single slab per side reads as a blob.
+    const horn = (sx, sy) => {
+      const xo = cx + sx * R0 * 0.80, xi = cx + sx * R0 * 0.46;
+      const yb = cy + sy * R0 * 0.52, yt = cy + sy * L;
+      return `<path d='M${xo} ${yb} L${cx + sx * R0 * 0.74} ${yt} Q${cx + sx * R0 * 0.64} ${yt + sy * 7} ${cx + sx * R0 * 0.54} ${yt} L${xi} ${yb} Z' fill='${lugFill}'/>` +
+        (detail >= 2
+          ? `<path d='M${xo} ${yb} L${cx + sx * R0 * 0.74} ${yt}' stroke='${this._alpha(m.spec, 0.34)}' stroke-width='1.5' fill='none'/>` +
+            `<path d='M${xi} ${yb} L${cx + sx * R0 * 0.54} ${yt}' stroke='rgba(0,0,0,0.42)' stroke-width='1.2' fill='none'/>`
+          : "");
+    };
+    return horn(-1, -1) + horn(1, -1) + horn(-1, 1) + horn(1, 1);
+  }
+
+  // --- strap ------------------------------------------------------------------
+  _strap(spec, R, type, hex) {
+    const cx = 240, cy = 300, L = R.lugHalf;
+    const topY = cy - L + 4, botY = cy + L - 4;
+    const w = R.caseOuter * 0.98;
+    if (type === "Metal") {
+      // The bracelet is made of the same metal as the case — a chrome bracelet
+      // on a blackened case is the sort of mismatch nobody ships.
+      let s = "";
+      const rows = [];
+      for (let y = 14; y < topY; y += 21) rows.push(y);
+      for (let y = botY + 4; y < 588; y += 21) rows.push(y);
+      rows.forEach(y => {
+        [[cx - w / 2, w * 0.30], [cx - w * 0.16, w * 0.32], [cx + w * 0.20, w * 0.30]].forEach(([lx, lw]) => {
+          s += `<rect x='${lx}' y='${y}' width='${lw}' height='17' rx='3.5' fill='url(#${'lnk' + spec.metal})' stroke='rgba(0,0,0,0.30)' stroke-width='0.6'/>`;
+        });
+      });
+      return s;
+    }
+    const dk = this._shade(hex, -0.42), lt = this._shade(hex, 0.16);
+    const stitch = (x, y1, y2) => `<line x1='${x}' y1='${y1}' x2='${x}' y2='${y2}' stroke='rgba(0,0,0,0.45)' stroke-width='1.3' stroke-dasharray='5 4'/>`;
+    let s =
+      `<path d='M${cx - w * 0.40} 14 L${cx + w * 0.40} 14 L${cx + w * 0.50} ${topY} L${cx - w * 0.50} ${topY} Z' fill='${hex}'/>` +
+      `<path d='M${cx - w * 0.40} 14 L${cx - w * 0.10} 14 L${cx - w * 0.16} ${topY} L${cx - w * 0.50} ${topY} Z' fill='${lt}' opacity='0.28'/>` +
+      `<path d='M${cx - w * 0.50} ${botY} L${cx + w * 0.50} ${botY} L${cx + w * 0.36} 566 Q${cx + w * 0.34} 586 ${cx + w * 0.16} 586 L${cx - w * 0.16} 586 Q${cx - w * 0.34} 586 ${cx - w * 0.36} 566 Z' fill='${hex}'/>` +
+      `<path d='M${cx - w * 0.50} ${botY} L${cx - w * 0.16} ${botY} L${cx - w * 0.10} 566 L${cx - w * 0.36} 566 Z' fill='${lt}' opacity='0.24'/>` +
+      stitch(cx - w * 0.42, 20, topY - 4) + stitch(cx + w * 0.42, 20, topY - 4) +
+      stitch(cx - w * 0.42, botY + 4, 560) + stitch(cx + w * 0.42, botY + 4, 560) +
+      `<rect x='${cx - w * 0.34}' y='${topY - 62}' width='${w * 0.68}' height='15' rx='3' fill='${dk}'/>` +
+      `<rect x='${cx - w * 0.22}' y='548' width='${w * 0.44}' height='30' rx='4' fill='none' stroke='#c6cacd' stroke-width='4.5'/>` +
+      `<line x1='${cx}' y1='548' x2='${cx}' y2='578' stroke='#c6cacd' stroke-width='3.5'/>`;
+    if (type === "Canvas") {
+      for (let y = 20; y < topY; y += 8) s += `<line x1='${cx - w * 0.5}' y1='${y}' x2='${cx + w * 0.5}' y2='${y - 5}' stroke='rgba(0,0,0,0.14)' stroke-width='2'/>`;
+      for (let y = botY + 6; y < 566; y += 8) s += `<line x1='${cx - w * 0.5}' y1='${y}' x2='${cx + w * 0.5}' y2='${y - 5}' stroke='rgba(0,0,0,0.14)' stroke-width='2'/>`;
+    }
+    return s;
+  }
+
+  // --- per-model specs --------------------------------------------------------
+  // Every model is a different watch, not a recolour: case size, finish, bezel
+  // treatment, dial material, index type, hand style and complication all move.
+  // `signature` names the peak whose summit profile the model carries, and the
+  // single element that carries it.
+  watchSpec(slug) {
+    const p = this.productBySlug(slug) || {};
+    const S = {
+      // Field / explorer — the hero model.
+      everest: {
+        caseMm: 40, l2lMm: 47.6, metal: "titanium", finish: "brushed", bezelStyle: "slope", bezelPct: 0.088, dialPct: 0.81,
+        dial: { type: "sunburst", base: "#dfe6ea", axis: 112, lift: 0.26 },
+        index: { type: "applied-baton", lume: true }, hands: { style: "syringe", lume: true, color: "#78838b", secondColor: "#2f6f96" },
+        dialText: "#2c3238", lume: "#e4dcb4", accent: "#3f7fa8", complication: null, date: null,
+        signature: { peak: "everest", element: "12" }, altitude: "8,848.86 m"
+      },
+      // Dress — sacred quiet. Nothing on this dial raises its voice.
+      kanchenjunga: {
+        caseMm: 39, l2lMm: 45.8, metal: "gold", finish: "polished", bezelStyle: "slope", bezelPct: 0.082, dialPct: 0.82,
+        dial: { type: "lacquer", base: "#20402f", axis: 130, lift: 0.14 },
+        index: { type: "applied-baton", lume: false }, hands: { style: "dauphine", lume: false, color: "#e7d7a8", secondColor: "#e7d7a8" },
+        dialText: "#e6dcc0", lume: "#d9d0a4", accent: "#c9a94e", complication: null, date: null,
+        signature: { peak: "kangchenjunga", element: "caseback" }, altitude: "8,586 m"
+      },
+      // Tool — GMT / dual time. Lhotse shares the South Col with Everest; the
+      // watch shares its dial with a second time zone.
+      lhotse: {
+        caseMm: 42, l2lMm: 48.8, metal: "graphite", finish: "brushed", indexMetal: "steel", bezelStyle: "dive", bezelPct: 0.105, dialPct: 0.79,
+        bezelInsert: "#191c20",
+        dial: { type: "matte", base: "#15181b", axis: 100, lift: 0.10 },
+        index: { type: "applied-baton", lume: true }, hands: { style: "sword", lume: true, color: "#dfe3e6", secondColor: "#e6e9ec" },
+        dialText: "#d6dade", lume: "#dcd6ac", accent: "#e8792e", complication: "gmt", date: null,
+        signature: { peak: "lhotse", element: "counterweight" }, altitude: "8,516 m"
+      },
+      // Tool — angular, blackened. Makalu is an isolated four-sided pyramid, so
+      // the case is faceted and the indices are arrowheads.
+      makalu: {
+        caseMm: 41, l2lMm: 48.2, metal: "ceramic", finish: "ceramic", indexMetal: "steel", bezelStyle: "coin", bezelPct: 0.100, dialPct: 0.79,
+        dial: { type: "grained", base: "#1c1e22", axis: 122, lift: 0.13 },
+        index: { type: "applied-arrow", lume: true }, hands: { style: "sword", lume: true, color: "#c98a5a", secondColor: "#c98a5a" },
+        dialText: "#cfc6bb", lume: "#dcd6ac", accent: "#b5714a", complication: null, date: { pos: 3 },
+        signature: { peak: "makalu", element: "12" }, altitude: "8,485 m"
+      },
+      // Field — turquoise dial. Cho Oyu is the Turquoise Goddess.
+      chooyu: {
+        caseMm: 39, l2lMm: 46.4, metal: "steel", finish: "brushed", bezelStyle: "slope", bezelPct: 0.090, dialPct: 0.81,
+        dial: { type: "sunburst", base: "#14807f", axis: 124, lift: 0.42 },
+        index: { type: "printed-arabic", lume: true }, hands: { style: "syringe", lume: true, color: "#f2efe6", secondColor: "#e8a33a" },
+        dialText: "#eaf2f0", lume: "#e4dcb4", accent: "#3bc0bf", complication: null, date: null,
+        signature: { peak: "chooyu", element: "counterweight" }, altitude: "8,188 m"
+      },
+      // Dress — white, high polish. Dhaulagiri is the dazzling white mountain.
+      dhaulagiri: {
+        caseMm: 38, l2lMm: 44.6, metal: "steel", finish: "polished", bezelStyle: "slope", bezelPct: 0.080, dialPct: 0.82,
+        dial: { type: "sunburst", base: "#eceae4", axis: 118, lift: 0.22 },
+        index: { type: "applied-baton", lume: false }, hands: { style: "dauphine", lume: false, color: "#9aa1a7", secondColor: "#9aa1a7" },
+        dialText: "#3a3f45", lume: "#ded6ae", accent: "#9fb4c0", complication: null, date: null,
+        signature: { peak: "dhaulagiri", element: "caseback" }, altitude: "8,167 m"
+      },
+      // Dress — deep lacquer. Manaslu, the mountain of the spirit.
+      manaslu: {
+        caseMm: 40, l2lMm: 46.8, metal: "steel", finish: "polished", bezelStyle: "slope", bezelPct: 0.085, dialPct: 0.82,
+        dial: { type: "lacquer", base: "#1b3358", axis: 126, lift: 0.16 },
+        index: { type: "applied-round", lume: true }, hands: { style: "dauphine", lume: true, color: "#e4e9ef", secondColor: "#8fb2d6" },
+        dialText: "#dde5ef", lume: "#d8e0c0", accent: "#8fb2d6", complication: null, date: null,
+        signature: { peak: "manaslu", element: "12" }, altitude: "8,163 m"
+      },
+      // Tool — utilitarian, no ornament. The first 8,000er climbed, and the one
+      // with the highest fatality ratio. Nothing decorative earns a place here.
+      annapurna: {
+        caseMm: 41, l2lMm: 47.8, metal: "bronze", finish: "brushed", bezelStyle: "coin", bezelPct: 0.096, dialPct: 0.80,
+        dial: { type: "matte", base: "#2a2620", axis: 108, lift: 0.10 },
+        index: { type: "printed-arabic", lume: true }, hands: { style: "sword", lume: true, color: "#e6dcc4", secondColor: "#b07a3c" },
+        dialText: "#ddd2b8", lume: "#ddd3a2", accent: "#b07a3c", complication: null, date: { pos: 3 },
+        signature: { peak: "annapurna", element: "counterweight" }, altitude: "8,091 m"
+      },
+
+      // ---- models named for places rather than the eight 8,000ers ----
+      machhapuchhre: {
+        caseMm: 39, l2lMm: 45.4, metal: "steel", finish: "polished", bezelStyle: "slope", bezelPct: 0.084, dialPct: 0.82,
+        dial: { type: "sunburst", base: "#174a49", axis: 120, lift: 0.24 },
+        index: { type: "applied-baton", lume: false }, hands: { style: "dauphine", lume: false, color: "#e8f1ee", secondColor: "#9fbfba" },
+        dialText: "#dbe8e5", lume: "#d8dfc0", accent: "#bcd3cf", complication: null, date: null,
+        signature: { peak: "machapuchare", element: "12" }, altitude: "6,993 m"
+      },
+      amadablam: {
+        caseMm: 40, l2lMm: 46.6, metal: "steel", finish: "polished", bezelStyle: "slope", bezelPct: 0.086, dialPct: 0.81,
+        dial: { type: "sunburst", base: "#e6e9ec", axis: 116, lift: 0.26 },
+        index: { type: "applied-baton", lume: true }, hands: { style: "dauphine", lume: true, color: "#8f979e", secondColor: "#7fb4d6" },
+        dialText: "#333940", lume: "#dfe2c4", accent: "#7fb4d6", complication: null, date: null,
+        signature: { peak: "amadablam", element: "caseback" }, altitude: "6,812 m"
+      },
+      sagarmatha: {
+        caseMm: 42, l2lMm: 48.6, metal: "titanium", finish: "brushed", bezelStyle: "dive", bezelPct: 0.104, dialPct: 0.79,
+        bezelInsert: "#14181d",
+        dial: { type: "matte", base: "#101317", axis: 104, lift: 0.10 },
+        index: { type: "applied-baton", lume: true }, hands: { style: "syringe", lume: true, color: "#e2e7ea", secondColor: "#e6e9ec" },
+        dialText: "#d2d8dd", lume: "#dcd6ac", accent: "#e8792e", complication: "gmt", date: { pos: 3 },
+        signature: { peak: "everest", element: "caseback" }, altitude: "8,848.86 m"
+      },
+      gurkha: {
+        caseMm: 40, l2lMm: 47.0, metal: "steel", finish: "brushed", bezelStyle: "coin", bezelPct: 0.094, dialPct: 0.80,
+        dial: { type: "matte", base: "#2e3a2a", axis: 110, lift: 0.10 },
+        index: { type: "printed-arabic", lume: true }, hands: { style: "syringe", lume: true, color: "#ece6d4", secondColor: "#b23b30" },
+        dialText: "#dcd8c4", lume: "#ddd3a2", accent: "#b23b30", complication: null, date: null,
+        signature: { peak: "annapurna", element: "caseback" }, altitude: null
+      },
+      kathmandu: {
+        caseMm: 39, l2lMm: 45.6, metal: "gold", finish: "polished", bezelStyle: "flute", bezelPct: 0.092, dialPct: 0.81,
+        dial: { type: "lacquer", base: "#6e2a22", axis: 128, lift: 0.15 },
+        index: { type: "applied-baton", lume: false }, hands: { style: "dauphine", lume: false, color: "#e8d5a8", secondColor: "#d8c48f" },
+        dialText: "#e8dcc0", lume: "#d9d0a4", accent: "#d8c48f", complication: null, date: null,
+        signature: { peak: "machapuchare", element: "caseback" }, altitude: "1,400 m"
+      },
+      langtang: {
+        caseMm: 41, l2lMm: 47.4, metal: "steel", finish: "brushed", bezelStyle: "coin", bezelPct: 0.095, dialPct: 0.80,
+        dial: { type: "grained", base: "#33422f", axis: 114, lift: 0.12 },
+        index: { type: "printed-arabic", lume: true }, hands: { style: "sword", lume: true, color: "#e8e2ce", secondColor: "#b0a24a" },
+        dialText: "#dcd6c2", lume: "#ddd3a2", accent: "#b0a24a", complication: null, date: { pos: 3 },
+        signature: { peak: "dhaulagiri", element: "counterweight" }, altitude: "7,227 m"
+      },
+      tilicho: {
+        caseMm: 40, l2lMm: 46.8, metal: "steel", finish: "brushed", bezelStyle: "dive", bezelPct: 0.100, dialPct: 0.80,
+        bezelInsert: "#12383c",
+        dial: { type: "sunburst", base: "#188f96", axis: 122, lift: 0.32 },
+        index: { type: "applied-round", lume: true }, hands: { style: "syringe", lume: true, color: "#eef3f3", secondColor: "#e8e2ce" },
+        dialText: "#e8f3f2", lume: "#dfe4c0", accent: "#3bc0bf", complication: null, date: null,
+        signature: { peak: "annapurna", element: "12" }, altitude: "4,919 m"
+      },
+      mustang: {
+        caseMm: 39, l2lMm: 45.8, metal: "bronze", finish: "brushed", bezelStyle: "flute", bezelPct: 0.090, dialPct: 0.81,
+        dial: { type: "grained", base: "#a9682a", axis: 118, lift: 0.16 },
+        index: { type: "applied-baton", lume: false }, hands: { style: "dauphine", lume: false, color: "#5a3a1c", secondColor: "#7c2f28" },
+        dialText: "#3a2a16", lume: "#e0d6a8", accent: "#7c2f28", complication: null, date: null,
+        signature: { peak: "dhaulagiri", element: "caseback" }, altitude: "3,840 m"
+      },
+      sherpa: {
+        caseMm: 40, l2lMm: 46.4, metal: "bronze", finish: "brushed", bezelStyle: "slope", bezelPct: 0.088, dialPct: 0.81,
+        dial: { type: "sunburst", base: "#e2d4b2", axis: 120, lift: 0.24 },
+        index: { type: "applied-round", lume: true }, hands: { style: "dauphine", lume: true, color: "#8a6a3c", secondColor: "#c46a3a" },
+        dialText: "#3c3222", lume: "#ddd3a2", accent: "#c46a3a", complication: null, date: null,
+        signature: { peak: "everest", element: "caseback" }, altitude: "8,848.86 m"
+      }
+    };
+    const base = S[slug] || S.everest;
+    // strap colour comes from the product record so the store's own data stays
+    // the single source of truth for merchandising
+    return { ...base, slug, strapType: p.strapType || "Leather", strapHex: this.strapHex(p) };
+  }
+
+  strapHex(p) {
+    const c = (p.strapColor || "").toLowerCase();
+    if (p.strapType === "Metal") return "#8f9398";
+    if (p.strapType === "Canvas") return /moss|green/.test(c) ? "#4a5233" : "#5c5b39";
+    if (/ice/.test(c)) return "#5b6b7a";
+    if (/blue|navy/.test(c)) return "#2c3f56";
+    if (/grey|gray/.test(c)) return "#54565a";
+    if (/sun-baked|distress/.test(c)) return "#6b452a";
+    return "#5a3b23";
+  }
+
+  // --- the assembler ----------------------------------------------------------
+  // shot: front | dial | caseback | lume | side
+  // detail: 3 = hero/product, 2 = grid, 1 = thumbnail
+  watchSVG(slug, opts) {
+    opts = opts || {};
+    const spec = this.watchSpec(slug), p = this.productBySlug(slug) || {};
+    const R = this.watchGeom(spec);
+    const u = "w" + slug + (opts.uid || "") + "-";
+    const shot = opts.shot || "front";
+    const detail = opts.detail == null ? 3 : opts.detail;
+    const cx = 240, cy = 300;
+    const mat = this._matDefs(u, spec);
+    const m = mat.m;
+
+    if (shot === "caseback") return this._caseback(u, spec, R, p, mat);
+
+    const strapType = opts.strapKey ? ({ leather: "Leather", canvas: "Canvas", steel: "Metal" }[opts.strapKey] || spec.strapType) : spec.strapType;
+    const strapHex = strapType === spec.strapType ? spec.strapHex : (strapType === "Metal" ? "#8f9398" : strapType === "Canvas" ? "#5c5b39" : "#5a3b23");
+
+    // Hand angles. Static shots sit at 10:09:32 — the classic display position,
+    // which keeps the hands clear of the logo and the date.
+    const t = opts.time || { h: 10, m: 9, s: 32 };
+    const aH = (t.h % 12) * 30 + t.m * 0.5 + t.s * (0.5 / 60);
+    const aM = t.m * 6 + t.s * 0.1;
+    const aS = t.s * 6;
+
+    const handG = (kind, angle, cls, lumeOnly) => {
+      const H = this._hand(spec, R, kind, angle, u, lumeOnly);
+      if (!H.body) return "";
+      return `<g class='wa-hand ${cls}' style='--wa-a:${angle.toFixed(2)}deg;transform-box:view-box;transform-origin:${cx}px ${cy}px;transform:rotate(${angle.toFixed(2)}deg)'>${H.body}</g>`;
+    };
+
+    const wedges = this._sunburst(u, spec, R, detail >= 3 ? 360 : detail === 2 ? 120 : 30);
+    const grain = spec.dial.type === "grained" && detail >= 3
+      ? `<circle cx='${cx}' cy='${cy}' r='${R.dial}' filter='url(#${u}grain)' opacity='0.14'/>` : "";
+
+    // GMT 24-hour track, drawn on the dial rather than added as a subdial —
+    // Lhotse shares a col with Everest; the watch shares one dial with two zones.
+    let comp = "";
+    if (spec.complication === "gmt") {
+      for (let i = 0; i < 24; i++) {
+        const a = i * 15, big = i % 2 === 0;
+        const [ax, ay] = this._pt(cx, cy, R.idxInner - R.D * 0.012, a), [bx, by] = this._pt(cx, cy, R.idxInner - R.D * (big ? 0.036 : 0.026), a);
+        comp += `<line x1='${ax}' y1='${ay}' x2='${bx}' y2='${by}' stroke='${spec.accent}' stroke-width='${big ? 1.5 : 0.8}' opacity='0.65'/>`;
+        if (i % 6 === 0 && detail >= 3) {
+          const [tx, ty] = this._pt(cx, cy, R.idxInner - R.D * 0.062, a);
+          comp += `<text x='${tx}' y='${+ty + 3}' font-family='ui-monospace,Menlo,monospace' font-size='${(R.D * 0.030).toFixed(1)}' fill='${spec.accent}' text-anchor='middle' opacity='0.62'>${String(i).padStart(2, "0")}</text>`;
+        }
+      }
+      // 24-hour hand, running at half the hour hand's rate.
+      const a24 = ((t.h % 24) * 15 + t.m * 0.25);
+      const [gx, gy] = this._pt(cx, cy, R.idxInner - R.D * 0.020, a24);
+      comp += `<g class='wa-hand wa-g' style='--wa-a:${a24.toFixed(2)}deg;transform-box:view-box;transform-origin:${cx}px ${cy}px;transform:rotate(${a24.toFixed(2)}deg)'>` +
+        `<line x1='${cx}' y1='${cy + R.D * 0.03}' x2='${cx}' y2='${cy - (R.idxInner - R.D * 0.02)}' stroke='${spec.accent}' stroke-width='${R.D * 0.014}'/>` +
+        `<circle cx='${cx}' cy='${cy - (R.idxInner - R.D * 0.05)}' r='${R.D * 0.026}' fill='none' stroke='${spec.accent}' stroke-width='${R.D * 0.012}'/></g>`;
+    }
+
+    // Chamfered date frame, in the case metal — a printed box is a giveaway.
+    let date = "";
+    if (spec.date) {
+      const a = spec.date.pos * 30;
+      const [dx, dy] = this._pt(cx, cy, R.idxInner - R.D * 0.030, a);
+      const w = R.D * 0.072, h = R.D * 0.060;
+      date =
+        `<rect x='${+dx - w / 2 - 2}' y='${+dy - h / 2 - 2}' width='${w + 4}' height='${h + 4}' rx='1.5' fill='${mat.caseFill}'/>` +
+        `<rect x='${+dx - w / 2 - 2}' y='${+dy - h / 2 - 2}' width='${w + 4}' height='${h + 4}' rx='1.5' fill='none' stroke='${this._alpha(m.spec, 0.5)}' stroke-width='0.9'/>` +
+        `<rect x='${+dx - w / 2}' y='${+dy - h / 2}' width='${w}' height='${h}' fill='${spec.dial.type === "lacquer" || this._hx(spec.dial.base)[0] < 120 ? "#171717" : "#f2efe8"}'/>` +
+        `<text x='${dx}' y='${+dy + h * 0.26}' font-family='ui-monospace,Menlo,monospace' font-size='${(h * 0.58).toFixed(1)}' fill='${spec.dial.type === "lacquer" || this._hx(spec.dial.base)[0] < 120 ? "#e6e2d8" : "#1d1d1d"}' text-anchor='middle'>18</text>`;
+    }
+
+    const zoom = shot === "dial" ? ` transform='translate(${cx},${cy}) scale(1.46) translate(${-cx},${-cy})'` : "";
+    const lumeShot = shot === "lume";
+
+    const body =
+      `<circle cx='${cx}' cy='${cy}' r='${R.bezelInner}' fill='${this._shade(m.base, -0.55)}'/>` +
+      // dial face: base, finish, specular — three layers, always
+      `<circle cx='${cx}' cy='${cy}' r='${R.dial}' fill='url(#${u}dial)'/>` +
+      `<g clip-path='url(#${u}dclip)'>${wedges}${grain}` +
+        `<circle cx='${cx}' cy='${cy}' r='${R.dial}' fill='url(#${u}axis)'/>` +
+        `<circle cx='${cx}' cy='${cy}' r='${R.dial}' fill='url(#${u}cross)'/>` +
+      `</g>` +
+      // angled chapter ring
+      `<circle cx='${cx}' cy='${cy}' r='${(R.chapOuter + R.chapInner) / 2}' fill='none' stroke='url(#${u}chap)' stroke-width='${R.chapOuter - R.chapInner}'/>` +
+      `<circle cx='${cx}' cy='${cy}' r='${R.chapInner}' fill='none' stroke='rgba(0,0,0,0.22)' stroke-width='0.8'/>` +
+      this._track(spec, R, detail) +
+      comp +
+      this._indices(u, spec, R, detail) +
+      date +
+      // dial text at real-world scale — the brand mark is smaller than instinct says
+      `<text x='${cx}' y='${cy - R.D * 0.150}' font-family='Cormorant Garamond,Georgia,serif' font-size='${(R.D * 0.049).toFixed(1)}' letter-spacing='${(R.D * 0.011).toFixed(2)}' fill='${spec.dialText}' text-anchor='middle'>NEPAL</text>` +
+      `<text x='${cx}' y='${cy - R.D * 0.108}' font-family='ui-monospace,Menlo,monospace' font-size='${(R.D * 0.019).toFixed(1)}' letter-spacing='${(R.D * 0.012).toFixed(2)}' fill='${spec.dialText}' text-anchor='middle' opacity='0.55'>HIMALAYAN</text>` +
+      `<text x='${cx}' y='${cy + R.D * 0.200}' font-family='ui-monospace,Menlo,monospace' font-size='${(R.D * 0.027).toFixed(1)}' letter-spacing='${(R.D * 0.004).toFixed(2)}' fill='${spec.dialText}' text-anchor='middle' opacity='0.72'>${spec.altitude ? spec.altitude.toUpperCase() : (p.movement || "").toUpperCase()}</text>` +
+      handG("h", aH, "wa-h") + handG("m", aM, "wa-m") + handG("s", aS, "wa-s") +
+      // pivot cap
+      `<circle cx='${cx}' cy='${cy}' r='${R.D * 0.022}' fill='${mat.caseFill}'/>` +
+      `<circle cx='${cx}' cy='${cy}' r='${R.D * 0.022}' fill='none' stroke='rgba(0,0,0,0.4)' stroke-width='0.8'/>` +
+      `<circle cx='${cx}' cy='${cy}' r='${R.D * 0.009}' fill='${spec.hands.secondColor}'/>`;
+
+    // Sapphire, last: one diagonal glare band + a faint blue-violet AR cast.
+    const crystal = (lumeShot || detail < 2) ? "" :
+      `<g clip-path='url(#${u}dclip)'>` +
+      `<circle cx='${cx}' cy='${cy}' r='${R.dial}' fill='url(#${u}ar)'/>` +
+      `<rect x='${cx - R.dial}' y='${cy - R.dial}' width='${R.dial * 2}' height='${R.dial * 2}' fill='url(#${u}glare)' class='wa-glare'/></g>`;
+
+    const bgTop = lumeShot ? "#080a0d" : "#241f19", bgBot = lumeShot ? "#020304" : "#100d09";
+    // Lume shot: kill the lights, then let only the charged compound emit. The
+    // glow is a blur of the same shapes underneath the crisp ones.
+    let lumeLayer = "";
+    if (lumeShot) {
+      const only = this._indices(u, spec, R, detail, true) +
+        handG("h", aH, "wa-h", true) + handG("m", aM, "wa-m", true);
+      lumeLayer =
+        `<rect x='-40' y='-40' width='560' height='680' fill='#05070a' opacity='0.86'/>` +
+        `<g filter='url(#${u}glow)' opacity='0.85'>${only}</g>${only}`;
+    }
+
+    const defs = `<defs>${mat.defs}${this._dialDefs(u, spec, R, detail)}` +
+      `<filter id='${u}glow' x='-40%' y='-40%' width='180%' height='180%'><feGaussianBlur stdDeviation='${(R.D * 0.020).toFixed(1)}'/></filter>` +
+      `<radialGradient id='${u}bg' cx='36%' cy='26%' r='86%'><stop offset='0%' stop-color='${bgTop}'/><stop offset='100%' stop-color='${bgBot}'/></radialGradient>` +
+      `<linearGradient id='lnk${spec.metal}' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='${this._shade(m.lt, 0.14)}'/><stop offset='46%' stop-color='${m.base}'/><stop offset='46%' stop-color='${this._shade(m.base, -0.16)}'/><stop offset='100%' stop-color='${m.dk}'/></linearGradient></defs>`;
+
+    return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 600' role='img'>${defs}` +
+      `<rect width='480' height='600' fill='url(#${u}bg)'/>` +
+      `<ellipse cx='240' cy='${cy + R.caseOuter + 14}' rx='${R.caseOuter * 0.94}' ry='${R.caseOuter * 0.13}' fill='rgba(0,0,0,0.45)'/>` +
+      (shot === "dial" ? "" : this._strap(spec, R, strapType, strapHex)) +
+      `<g${zoom}>` +
+      this._lugs(u, spec, R, mat.lugFill, detail) +
+      this._crown(u, spec, R, mat.caseFill, detail) +
+      this._bezel(u, spec, R, mat, detail) +
+      body + crystal + lumeLayer +
+      `</g></svg>`;
+  }
+
+  // --- caseback ---------------------------------------------------------------
+  // Carries the engraved altitude. On models signed at the caseback it also
+  // carries the peak's summit profile, cut into the metal.
+  _caseback(u, spec, R, p, mat) {
+    const cx = 240, cy = 300, m = mat.m, detail = 3;
+    const ro = R.caseOuter, rd = ro * 0.84;
+    let s = "";
+    // Six case screws, evenly spaced.
+    for (let i = 0; i < 6; i++) {
+      const a = i * 60 + 30, [x, y] = this._pt(cx, cy, ro * 0.90, a);
+      s += `<circle cx='${x}' cy='${y}' r='${ro * 0.034}' fill='${this._shade(m.base, -0.30)}'/>` +
+        `<circle cx='${x}' cy='${y}' r='${ro * 0.034}' fill='none' stroke='${this._alpha(m.spec, 0.4)}' stroke-width='0.8'/>` +
+        `<line x1='${+x - ro * 0.020}' y1='${y}' x2='${+x + ro * 0.020}' y2='${y}' stroke='rgba(0,0,0,0.6)' stroke-width='1.4'/>`;
+    }
+    // Engraved summit relief.
+    let relief = "";
+    if (spec.signature.element === "caseback") {
+      const w = rd * 0.86, h = w * 0.40, ry = cy - rd * 0.46;
+      const prof = this.summitProfile(spec.signature.peak);
+      const at = (dy, extra) => `<g transform='translate(${(cx - w / 2).toFixed(1)},${(ry + dy).toFixed(1)}) scale(${(w / 100).toFixed(4)},${(h / 44).toFixed(4)})'><path d='${prof}' ${extra}/></g>`;
+      relief =
+        at(1.2, `fill='${this._alpha(m.spec, 0.30)}'`) +                                  // lit lower lip of the groove
+        at(0, `fill='${this._shade(m.base, -0.30)}'`) +                                   // the cut itself
+        at(0, `fill='none' stroke='${this._shade(m.base, -0.55)}' stroke-width='1.2' vector-effect='non-scaling-stroke'`);
+    }
+    const alt = spec.altitude || (p.region || "");
+    return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 600' role='img'><defs>${mat.defs}` +
+      `<radialGradient id='${u}bg2' cx='36%' cy='26%' r='86%'><stop offset='0%' stop-color='#241f19'/><stop offset='100%' stop-color='#100d09'/></radialGradient>` +
+      `<radialGradient id='${u}disc' cx='38%' cy='32%' r='76%'><stop offset='0%' stop-color='${this._shade(m.base, 0.06)}'/><stop offset='100%' stop-color='${this._shade(m.base, -0.42)}'/></radialGradient></defs>` +
+      `<rect width='480' height='600' fill='url(#${u}bg2)'/>` +
+      `<ellipse cx='240' cy='${cy + ro + 14}' rx='${ro * 0.94}' ry='${ro * 0.13}' fill='rgba(0,0,0,0.45)'/>` +
+      this._lugs(u, spec, R, mat.lugFill, 3) +
+      `<circle cx='${cx}' cy='${cy}' r='${ro}' fill='${mat.caseFill}'/>` +
+      `<circle cx='${cx}' cy='${cy}' r='${ro}' fill='url(#${u}wash)'/>` +
+      `<circle cx='${cx}' cy='${cy}' r='${rd}' fill='url(#${u}disc)'/>` +
+      `<circle cx='${cx}' cy='${cy}' r='${rd}' fill='none' stroke='rgba(0,0,0,0.4)' stroke-width='1.4'/>` +
+      `<circle cx='${cx}' cy='${cy}' r='${rd * 0.90}' fill='none' stroke='${this._alpha(m.spec, 0.18)}' stroke-width='0.8'/>` +
+      [0.62, 0.66, 0.70].map(k => `<circle cx='${cx}' cy='${cy}' r='${(rd * k).toFixed(1)}' fill='none' stroke='${this._alpha(m.dk, 0.30)}' stroke-width='0.6'/>`).join("") +
+      s + relief +
+      `<text x='${cx}' y='${cy + rd * 0.10}' font-family='Cormorant Garamond,Georgia,serif' font-size='${(ro * 0.13).toFixed(1)}' letter-spacing='${(ro * 0.036).toFixed(1)}' fill='${this._alpha(m.spec, 0.72)}' text-anchor='middle'>NEPAL</text>` +
+      (alt ? `<text x='${cx}' y='${cy + rd * 0.36}' font-family='ui-monospace,Menlo,monospace' font-size='${(ro * 0.098).toFixed(1)}' letter-spacing='${(ro * 0.012).toFixed(1)}' fill='${this._alpha(m.spec, 0.62)}' text-anchor='middle'>${alt}</text>` : "") +
+      `<text x='${cx}' y='${cy + rd * 0.58}' font-family='ui-monospace,Menlo,monospace' font-size='${(ro * 0.062).toFixed(1)}' letter-spacing='${(ro * 0.010).toFixed(1)}' fill='${this._alpha(m.spec, 0.42)}' text-anchor='middle'>${(p.region || "").toUpperCase()}</text>` +
+      `<text x='${cx}' y='${cy + rd * 0.74}' font-family='ui-monospace,Menlo,monospace' font-size='${(ro * 0.058).toFixed(1)}' letter-spacing='${(ro * 0.010).toFixed(1)}' fill='${this._alpha(m.spec, 0.34)}' text-anchor='middle'>${p.wr || ""} · SAPPHIRE</text>` +
+      `</svg>`;
+  }
+
+  _svgURI(svg) {
+    return svg.replace(/%/g, "%25").replace(/#/g, "%23")
+              .replace(/</g, "%3C").replace(/>/g, "%3E").replace(/"/g, "%22");
+  }
+
+  // --- public renderers -------------------------------------------------------
+  // Static: an SVG data-URI, for <image-slot> thumbnails. Cached.
+  watchArt(p, shot, strapKey, opts) {
+    const slug = typeof p === "string" ? p : p.slug;
+    if (!this._art) this._art = {};
+    const detail = shot === "thumb" ? 1 : (opts && opts.detail) || 1;
+    const key = slug + "|" + (shot || "front") + "|" + (strapKey || "") + "|" + detail;
+    if (this._art[key]) return this._art[key];
+    const svg = this.watchSVG(slug, { shot: shot === "thumb" ? "front" : (shot || "front"), strapKey, detail });
+    this._art[key] = "data:image/svg+xml," + this._svgURI(svg);
+    return this._art[key];
+  }
+
+  // Live: inline SVG in the document, so the hands run, the highlight tracks the
+  // pointer, and the caseback can flip. Falls back to a still under
+  // prefers-reduced-motion (handled in CSS — see .wa-* rules).
+  watchLive(p, opts) {
+    opts = opts || {};
+    const slug = typeof p === "string" ? p : p.slug;
+    const prod = this.productBySlug(slug) || {};
+    const spec = this.watchSpec(slug);
+    const now = new Date();
+    const time = { h: now.getHours(), m: now.getMinutes(), s: now.getSeconds() };
+    const uid = opts.uid || "L";
+    const front = this.watchSVG(slug, { shot: opts.shot || "front", strapKey: opts.strapKey, detail: opts.detail == null ? 3 : opts.detail, time, uid });
+    const back = opts.flip ? this.watchSVG(slug, { shot: "caseback", strapKey: opts.strapKey, detail: 3, uid: uid + "b" }) : null;
+    // Negative animation delays put each hand at the true current time and let
+    // CSS carry it from there — no JS ticking, no re-render per second.
+    const dH = -(((time.h % 12) * 3600 + time.m * 60 + time.s));
+    const dM = -((time.m * 60 + time.s));
+    const dS = -(time.s);
+    const alt = opts.alt || (prod.name + " — " + (spec.caseMm) + " mm " + (prod.caseMaterial || "").toLowerCase() + " case, " + (prod.dialColor || "").toLowerCase() + " dial, " + (opts.shot === "caseback" ? "engraved case back" : "front view"));
+    const face = (html, cls, extraStyle) => React.createElement("div", {
+      className: "wa-face " + cls,
+      style: extraStyle,
+      dangerouslySetInnerHTML: { __html: html }
+    });
+    return React.createElement("div", {
+      className: "wa-stage" + (opts.flipped ? " is-flipped" : ""),
+      "data-wa": slug,
+      style: { "--wa-dh": dH + "s", "--wa-dm": dM + "s", "--wa-ds": dS + "s" },
+      role: "img",
+      "aria-label": alt
+    }, React.createElement("div", { className: "wa-tilt" },
+      face(front, "wa-front"),
+      back ? face(back, "wa-back") : null
+    ));
   }
 
   strapOptionsFor(p) {
@@ -1489,15 +2423,109 @@ class Component extends DCLogic {
       ...[0,1,2].map(i => React.createElement("path", { key: "c"+i, d: `M120 ${300 - i*10} C 300 ${250 - i*12} 520 ${235 - i*10} 720 ${220 - i*12} S 940 ${205 - i*8} 960 ${210 - i*8}`, fill: "none", stroke: "#A07C46", strokeWidth: 0.75, opacity: 0.35 - i*0.08 }))
     ]);
   }
+  // ---------------------------------------------------------------------------
+  //  THE EIGHT-THOUSANDERS OF NEPAL
+  //  Every height and first-ascent line below traces to the verified reference
+  //  set. Heights are the figures in current official use; Everest's is the
+  //  2020 joint Nepal-China resurvey. First ascents name every summiter,
+  //  Sherpa climbers included and credited the same way as everyone else —
+  //  Tenzing Norgay is a first ascensionist, not a porter with a rope.
+  //  `sovereignty` exists because three of the eight are wholly Nepali and five
+  //  are not, and the copy used to blur that.
+  //  NOTE: the Kangchenjunga peak entry uses the standard romanisation; the
+  //  product it links to ships under the spelling "Kanchenjunga". Left as-is
+  //  rather than silently renaming a live product — flagged for the brand.
+  // ---------------------------------------------------------------------------
   peaksData() {
     return [
-      { name: "Everest", slug: "everest", nick: "Sagarmatha · The Summit", elevation: "8,848", region: "Koshi · Solukhumbu", watch: "Everest Summit 8848", price: "$449", left: 74, top: 42, significance: "The highest point on Earth. A glacier-blue dial and topographic contour texture mark the watch built for those who reach for the top." },
-      { name: "Kanchenjunga", slug: "kanchenjunga", nick: "The Five Treasures", elevation: "8,586", region: "Koshi · Taplejung", watch: "Kanchenjunga Five Treasures", price: "$549", left: 90, top: 40, significance: "Third-highest in the world and sacred to its valleys. Five subtle dial markers honour the five treasures of the high snow." },
-      { name: "Lhotse", slug: "lhotse", nick: "The Silent Giant", elevation: "8,516", region: "Koshi · Solukhumbu", watch: "Lhotse Silent Giant", price: "$349", left: 76, top: 47, significance: "Everest's dramatic neighbour. A matte-black dial with sharp geometric ridgelines and a single flash of orange." },
-      { name: "Makalu", slug: "makalu", nick: "The Great Black", elevation: "8,485", region: "Koshi · Sankhuwasabha", watch: "Makalu Pyramid", price: "$479", left: 80, top: 44, significance: "A near-perfect four-sided pyramid. Its architectural form becomes angular markers in graphite, black, and copper." },
-      { name: "Dhaulagiri", slug: "dhaulagiri", nick: "The White Mountain", elevation: "8,167", region: "Gandaki · Myagdi", watch: "Dhaulagiri White Mountain", price: "$279", left: 42, top: 46, significance: "The White Mountain. A minimal silver dial with cool ice-blue detailing — calm, pure, and timeless." },
-      { name: "Manaslu", slug: "manaslu", nick: "Mountain of the Spirit", elevation: "8,163", region: "Gandaki · Gorkha", watch: "Manaslu Spirit", price: "$419", left: 52, top: 44, significance: "The mountain of the spirit. Deep navy with a subtle mandala texture representing balance and inner strength." },
-      { name: "Annapurna I", slug: "annapurna", nick: "The Explorer", elevation: "8,091", region: "Gandaki · Kaski", watch: "Annapurna Explorer", price: "$389", left: 47, top: 49, significance: "The first 8,000er ever climbed. A warm bronze field watch with rock-textured dial and a compass index." }
+      {
+        name: "Everest", slug: "everest", nick: "Sagarmāthā · Chomolungma",
+        elevation: "8,848.86", region: "Koshi · Solukhumbu",
+        sovereignty: "Nepal / Tibet (China) border",
+        nameMeaning: "Sagarmāthā, Nepali for “forehead of the sky.” Chomolungma, Tibetan for “goddess mother of the world.”",
+        firstAscent: "29 May 1953 — Edmund Hillary and Tenzing Norgay Sherpa",
+        expedition: "British expedition led by John Hunt",
+        detail: "The two spent about fifteen minutes on top. Tenzing buried an offering of sweets and biscuits in the snow; Hillary left a small cross. Neither ever said which of them stepped up first, and both refused to be drawn on it for the rest of their lives.",
+        watch: "Everest Summit 8848", price: "$449", left: 74, top: 42,
+        significance: "The highest point on Earth, and the field watch the collection is built around. A glacier-white sunburst dial, brushed titanium, and the Everest ridgeline carried as the 12 marker — the only ornament the watch allows itself."
+      },
+      {
+        name: "Kangchenjunga", slug: "kanchenjunga", nick: "Five Treasures of the Great Snow",
+        elevation: "8,586", region: "Koshi · Taplejung",
+        sovereignty: "Nepal / Sikkim (India) border",
+        nameMeaning: "“Five Treasures of the Great Snow” — the five summits read as the storehouses of a god.",
+        firstAscent: "25 May 1955 — George Band and Joe Brown",
+        expedition: "British expedition led by Charles Evans",
+        detail: "They stopped a few feet below the true summit, honouring a promise made to the Chogyal of Sikkim that the top itself would stay untrodden. Every party since has kept the same convention.",
+        watch: "Kanchenjunga Five Treasures", price: "$549", left: 90, top: 40,
+        significance: "A mountain treated as sacred asks for a watch that does not raise its voice. Deep green lacquer that goes near-black at the rim, polished gold, no date, no seconds counter — and the summit profile hidden on the case back, where only the wearer sees it."
+      },
+      {
+        name: "Lhotse", slug: "lhotse", nick: "The South Peak",
+        elevation: "8,516", region: "Koshi · Solukhumbu",
+        sovereignty: "Nepal / Tibet (China) border",
+        nameMeaning: "Tibetan for “south peak” — it is named for its position on the Everest massif rather than for itself.",
+        firstAscent: "18 May 1956 — Fritz Luchsinger and Ernst Reiss",
+        expedition: "Swiss expedition",
+        detail: "Lhotse shares the South Col with Everest, so for two months a year the same camp serves both mountains. Climbers walk a common route to 7,900 m and only then turn away from each other.",
+        watch: "Lhotse Silent Giant", price: "$349", left: 76, top: 47,
+        significance: "One col, two mountains — so one dial, two time zones. A blackened GMT with a 24-hour track in orange, and the Lhotse ridgeline cut as the seconds-hand counterweight, sweeping past the pivot once a minute."
+      },
+      {
+        name: "Makalu", slug: "makalu", nick: "The Great Black",
+        elevation: "8,485", region: "Koshi · Sankhuwasabha",
+        sovereignty: "Nepal / Tibet (China) border",
+        nameMeaning: "From Mahākāla, a wrathful protector deity — not a description of the rock, but of what the mountain was understood to be.",
+        firstAscent: "15 May 1955 — Lionel Terray and Jean Couzy",
+        expedition: "French expedition led by Jean Franco",
+        detail: "Over the next two days the rest of the team followed, among them Gyalzen Norbu Sherpa. A year later Gyalzen Norbu stood on top of Manaslu on its first ascent — two eight-thousanders, first ascents both, twelve months apart.",
+        watch: "Makalu Pyramid", price: "$479", left: 80, top: 44,
+        significance: "An isolated four-sided pyramid, and the most severe watch here: blackened ceramic, a coin-edge bezel, arrowhead markers in rhodium so a dark dial still reads at a glance. Makalu's pyramid stands at 12."
+      },
+      {
+        name: "Cho Oyu", slug: "chooyu", nick: "Turquoise Goddess",
+        elevation: "8,188", region: "Koshi · Solukhumbu",
+        sovereignty: "Nepal / Tibet (China) border",
+        nameMeaning: "“Turquoise Goddess” — for the colour the face turns in late light.",
+        firstAscent: "19 October 1954 — Herbert Tichy, Joseph Jöchler and Pasang Dawa Lama",
+        expedition: "Austrian expedition",
+        detail: "No oxygen, no radio, and a team small enough to sleep in one tent — against the siege expeditions of the day it was almost heretical. It stood as the highest summit ever reached without supplementary oxygen until Messner and Habeler climbed Everest in 1978.",
+        watch: "Cho Oyu Turquoise Goddess", price: "$399", left: 72, top: 43,
+        significance: "The peak is named for a colour, so the watch is built around one: a turquoise sunburst that lifts along a single axis and goes deep at the rim. Painted Arabic numerals, brushed steel, nothing else competing."
+      },
+      {
+        name: "Dhaulagiri I", slug: "dhaulagiri", nick: "The Dazzling White Mountain",
+        elevation: "8,167", region: "Gandaki · Myagdi",
+        sovereignty: "Entirely within Nepal",
+        nameMeaning: "Sanskrit dhawala giri, “dazzling white mountain.”",
+        firstAscent: "13 May 1960 — Kurt Diemberger, Peter Diener, Ernst Forrer, Albin Schelbert, Nyima Dorje Sherpa and Nawang Dorje Sherpa",
+        expedition: "Swiss–Austrian expedition",
+        detail: "The team flew a Pilatus Porter onto the glacier to land supplies high on the mountain — the first time an aircraft was used to support a Himalayan climb. From its European discovery in 1808 until 1838, Dhaulagiri was believed to be the highest mountain on Earth.",
+        watch: "Dhaulagiri White Mountain", price: "$279", left: 42, top: 46,
+        significance: "Thirty years as the tallest thing anyone knew of, then quietly reassigned to seventh. The watch keeps that composure: the smallest case in the collection at 38 mm, a white sunburst under high-polish steel, and the ridgeline engraved out of sight on the back."
+      },
+      {
+        name: "Manaslu", slug: "manaslu", nick: "Mountain of the Spirit",
+        elevation: "8,163", region: "Gandaki · Gorkha",
+        sovereignty: "Entirely within Nepal",
+        nameMeaning: "From the Sanskrit manasa, “intellect” or “soul” — rendered as “mountain of the spirit.”",
+        firstAscent: "9 May 1956 — Toshio Imanishi and Gyalzen Norbu Sherpa",
+        expedition: "Japanese expedition",
+        detail: "Gyalzen Norbu had summited Makalu the previous year with the French. On Manaslu he was not support to someone else's attempt — he was one of the two men who made the first ascent.",
+        watch: "Manaslu Spirit", price: "$419", left: 52, top: 44,
+        significance: "A mountain named for the inward thing rather than the outward one. Deep navy lacquer, dark to nearly black where it meets the case, round applied markers set like beads, and Manaslu's twin summit pinnacles standing at 12."
+      },
+      {
+        name: "Annapurna I", slug: "annapurna", nick: "Goddess of the Harvests",
+        elevation: "8,091", region: "Gandaki · Kaski",
+        sovereignty: "Entirely within Nepal",
+        nameMeaning: "Sanskrit for “full of food” — the goddess of the harvests, and of being fed.",
+        firstAscent: "3 June 1950 — Maurice Herzog and Louis Lachenal",
+        expedition: "French expedition",
+        detail: "The first eight-thousander ever climbed, three years before Everest. The team's maps were wrong, and they spent weeks simply locating the mountain before they could start up it. Both summiters lost fingers and toes to frostbite on the descent. Annapurna I still carries the highest ratio of deaths to summits of the fourteen.",
+        watch: "Annapurna Explorer", price: "$389", left: 47, top: 49,
+        significance: "The first one climbed and the one that has taken the most. Nothing decorative earns a place: a bronze tool watch, matte dial, painted numerals, a date you can read in bad light, and Annapurna's serrated ridge as the counterweight."
+      }
     ];
   }
 
@@ -1555,7 +2583,7 @@ class Component extends DCLogic {
     const shopProducts = list.map(decorate);
 
     // filter groups UI
-    const collections = ["Everest", "Annapurna Series", "Dhaulagiri", "Manaslu", "Kanchenjunga", "Lhotse", "Makalu", "Gurkha Legacy", "Kathmandu Heritage", "Ama Dablam", "Langtang", "Tilicho", "Mustang", "Expedition", "Sherpa Heritage"];
+    const collections = ["Everest", "Annapurna Series", "Cho Oyu", "Dhaulagiri", "Manaslu", "Kanchenjunga", "Lhotse", "Makalu", "Gurkha Legacy", "Kathmandu Heritage", "Ama Dablam", "Langtang", "Tilicho", "Mustang", "Expedition", "Sherpa Heritage"];
     const chip = (on) => ({ bg: on ? "#A07C46" : "#17130e", border: on ? "#A07C46" : "#2b2720", color: on ? "#17130e" : "#a89f8f" });
     const toggleArr = (key, val) => () => { const arr = s.f[key].slice(); const i = arr.indexOf(val); if (i >= 0) arr.splice(i, 1); else arr.push(val); this.setState({ f: { ...s.f, [key]: arr } }); };
     const toggleBool = (key) => () => this.setState({ f: { ...s.f, [key]: !s.f[key] } });
@@ -1585,9 +2613,10 @@ class Component extends DCLogic {
     if (s.view === "product") {
       const p = this.productBySlug(s.slug) || base[0];
       const strap = s.strap || ({ Metal: "steel", Canvas: "canvas" }[p.strapType] || "leather");
-      const shots = ["Front", "Three-Quarter", "Dial Detail", "Case Back", "On Wrist"];
-      const shotMap = ["front", "front", "dial", "caseback", "front"];
-      const gallery = shots.map((label, i) => ({ id: "pg-" + p.slug + "-" + i + "-" + strap, label, img: this.watchArt(p, shotMap[i], strap), active: s.gallIdx === i, pick: prevent(() => this.setState({ gallIdx: i })) }));
+      const shots = ["Front", "Dial Detail", "Case Back", "Lume"];
+      const shotMap = ["front", "dial", "caseback", "lume"];
+      const gi = Math.min(s.gallIdx, shots.length - 1);
+      const gallery = shots.map((label, i) => ({ id: "pg-" + p.slug + "-" + i + "-" + strap, label, img: this.watchArt(p, shotMap[i], strap, { detail: 2 }), active: gi === i, pick: prevent(() => this.setState({ gallIdx: i, flipped: false })) }));
       const bs = badgeStyle(p.badge);
       const relatedSlugs = base.filter(x => x.slug !== p.slug && (x.collection === p.collection || x.movement === p.movement)).slice(0, 4);
       const related = (relatedSlugs.length ? relatedSlugs : base.filter(x => x.slug !== p.slug).slice(0, 4)).map(decorate);
@@ -1598,7 +2627,15 @@ class Component extends DCLogic {
         stockLabel: p.inventory === 0 ? "Sold out" : (p.inventory <= 20 ? "Only " + p.inventory + " left — ships today" : "In stock — ships today"),
         stockColor: p.inventory === 0 ? "#c96a5f" : (p.inventory <= 20 ? "#c9895f" : "#7fae72"),
         heart: s.wishlist.includes(p.slug) ? "♥" : "♡", wished: s.wishlist.includes(p.slug),
-        mainImgId: "pg-" + p.slug + "-" + s.gallIdx + "-" + strap, activeShot: shots[s.gallIdx], gallery, mainImg: this.watchArt(p, shotMap[s.gallIdx], strap),
+        mainImgId: "pg-" + p.slug + "-" + gi + "-" + strap, activeShot: shots[gi], gallery, mainImg: this.watchArt(p, shotMap[gi], strap),
+        // The hero rendering runs live: hands moving, highlight tracking the
+        // pointer, case back one press away. Thumbnails stay static stills.
+        watchEl: this.watchLive(p, { strapKey: strap, shot: shotMap[gi], flip: shotMap[gi] !== "caseback", flipped: s.flipped && shotMap[gi] !== "caseback", uid: "P" }),
+        canFlip: shotMap[gi] !== "caseback",
+        flipped: s.flipped,
+        flipLabel: s.flipped ? "Show the dial" : "Show the case back",
+        flipToggle: prevent(() => this.setState({ flipped: !s.flipped })),
+        gridSpecs: this.specsFor(p),
         qty: s.qty, qtyInc: prevent(() => this.setState({ qty: Math.min(s.qty + 1, p.inventory) })), qtyDec: prevent(() => this.setState({ qty: Math.max(1, s.qty - 1) })),
         strapOpts: this.strapOptionsFor(p).map(o => { const on = strap === o.key; const c = chip(on); return { label: o.label, pick: prevent(() => this.setState({ strap: o.key })), ...c }; }),
         add: prevent(() => this.addToCart(p.slug, strap, s.qty)),
@@ -1672,7 +2709,7 @@ class Component extends DCLogic {
       crownMark: React.createElement("svg", { width: 26, height: 26, viewBox: "0 0 40 40", fill: "none" }, React.createElement("path", { d: "M4 30 L14 12 L20 22 L26 8 L36 30 Z", stroke: "#C9A26a", strokeWidth: 1.4, fill: "none" })),
 
       featured: base.filter(p => p.featured).map(decorate),
-      peaks, activePeak: { ...ap, img: this.watchArt(this.productBySlug(ap.slug)), shop: prevent(() => this.go("product", ap.slug)) },
+      peaks, activePeak: { ...ap, img: this.watchArt(this.productBySlug(ap.slug), "thumb"), shop: prevent(() => this.go("product", ap.slug)) },
       activeGurkha: prevent(() => this.go("product", "gurkha")),
       craftSpecs: [
         { label: "Movement", value: "Automatic & Swiss quartz" }, { label: "Case", value: "Steel · Titanium · Bronze" },

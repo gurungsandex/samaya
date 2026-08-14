@@ -74,6 +74,19 @@ All content lives in the logic class inside `NEPAL Watches.dc.html`:
 | Discount codes | `applyDiscountCode()` + `totals()` |
 | Shipping rates & tax | `totals()` (methods map, `0.08` tax) |
 | Peaks / interactive map | `peaksData()` |
+| Watch renderings (per model) | `watchSpec()` — case, metal, finish, bezel, dial, indices, hands, complication, signature |
+| A peak's summit silhouette | `summitProfile()` |
+
+**Mountain reference data.** `peaksData()` carries the eight Nepali
+eight-thousanders with height, name meaning, first ascent (every summiter named),
+expedition, and whether the peak lies wholly in Nepal or on a border. Everest's
+height is the 2020 joint Nepal–China resurvey. Sherpa first ascensionists are
+credited exactly as their teammates are. If you add or change a figure here, cite
+it — the audience for this store checks.
+
+Two items are deliberately marked `TODO-VERIFY` in the source rather than guessed
+at: the Devanagari spelling of the Gurkha motto, and the variant spelling of
+Kangchenjunga used by the product that links to it.
 
 **Product images:** every image is a drop-in `<image-slot>` placeholder (drag a photo onto it in the editor; it persists). Slot ids follow a structured pattern (`pg-{slug}-{0..4}` gallery, `shop-{slug}`, `feat-{slug}`, `cart-{slug}`, `wl-{slug}`, `qv-{slug}`). Replace with professional product photography later — keep dial colour, hands, strap, and case finish consistent across a model's shots.
 
